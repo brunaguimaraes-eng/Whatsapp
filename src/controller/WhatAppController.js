@@ -100,205 +100,209 @@ class WhatAppController{
 
     initEvents(){
 
-        this.el.myPhoto.on('click', e=>{
+            this.el.myPhoto.on('click', e=>{
 
-            this.closeAllLeftPanel();
-            this.el.panelEditProfile.show();
-            setTimeout(() =>{
-                this.el.panelEditProfile.addClass('open');
-            },300);           
+                this.closeAllLeftPanel();
+                this.el.panelEditProfile.show();
+                setTimeout(() =>{
+                    this.el.panelEditProfile.addClass('open');
+                },300);           
 
-        });
+            });
 
-        this.el.btnNewContact.on('click', e=>{
+            this.el.btnNewContact.on('click', e=>{
 
-            this.closeAllLeftPanel();  
-            this.el.panelAddContact.show();      
-            setTimeout(() =>{
-                this.el.panelAddContact.addClass('open');
-            },300);
-            
+                this.closeAllLeftPanel();  
+                this.el.panelAddContact.show();      
+                setTimeout(() =>{
+                    this.el.panelAddContact.addClass('open');
+                },300);
+                
 
-        });
+            });
 
-        this.el.btnClosePanelEditProfile.on('click', e=>{
+            this.el.btnClosePanelEditProfile.on('click', e=>{
 
-            this.el.panelEditProfile.removeClass('open');
-    
-        });    
+                this.el.panelEditProfile.removeClass('open');
         
-        this.el.btnClosePanelAddContact.on('click', e => {
+            });    
+            
+            this.el.btnClosePanelAddContact.on('click', e => {
 
-            this.el.panelAddContact.removeClass('open');
+                this.el.panelAddContact.removeClass('open');
 
-        });
+            });
 
-        this.el.photoContainerEditProfile.on('click', e => {
+            this.el.photoContainerEditProfile.on('click', e => {
 
-            this.el.inputProfilePhoto.click();
+                this.el.inputProfilePhoto.click();
 
-        });
+            });
 
-        this.el.inputNamePanelEditProfile.on('keypress', e => {
+            this.el.inputNamePanelEditProfile.on('keypress', e => {
 
-            if (e.key === 'Enter') {
+                if (e.key === 'Enter') {
+
+                    e.preventDefault();
+                    this.el.btnSavePanelEditProfile.click();
+
+                }
+            });
+
+            this.el.btnSavePanelEditProfile.on('click', e => {
+
+                console.log(this.el.inputNamePanelEditProfile.innerHTML);
+
+            });
+
+            this.el.formPanelAddContact.on('submit', e =>{
 
                 e.preventDefault();
-                this.el.btnSavePanelEditProfile.click();
 
-            }
-        });
+                let formData = new formData(this.el.formPanelAddContact);
 
-        this.el.btnSavePanelEditProfile.on('click', e => {
+            });
 
-            console.log(this.el.inputNamePanelEditProfile.innerHTML);
+            this.el.contactsMessagesList.querySelectorAll('.contact-item').forEach(item => {
 
-        });
+                item.on('click', e => {
 
-        this.el.formPanelAddContact.on('submit', e =>{
+                    this.el.home.hide();
+                    this.el.main.css({
+                        display: 'flex'
+                    });
 
-            e.preventDefault();
-
-            let formData = new formData(this.el.formPanelAddContact);
-
-        });
-
-        this.el.contactsMessagesList.querySelectorAll('.contact-item').forEach(item => {
-
-            item.on('click', e => {
-
-                this.el.home.hide();
-                this.el.main.css({
-                    display: 'flex'
                 });
 
             });
 
-        });
+            this.el.btnAttach.on('click', e => {
 
-        this.el.btnAttach.on('click', e => {
-
-            e.stopPropagation();
-            this.el.menuAttach.addClass('open');
-            document.addEventListener('click', this.closeMenuAttach.bind(this));
-        });
-
-        this.el.btnAttachPhoto.on('click', e => {
-            
-            this.el.inputPhoto.click();
-
-        });
-
-        this.el.inputPhoto.on('change', e => {
-
-            console.log(this.el.inputPhoto.files);
-
-            [...this.el.inputPhoto.files].forEach(file => {
-                console.log(file);
+                e.stopPropagation();
+                this.el.menuAttach.addClass('open');
+                document.addEventListener('click', this.closeMenuAttach.bind(this));
             });
 
-        });
+            this.el.btnAttachPhoto.on('click', e => {
+                
+                this.el.inputPhoto.click();
 
-        this.el.btnAttachCamera.on('click', e => {
-            
-            this.closeAllMainPanel();
-            this.el.panelCamera.addClass('open');
-            this.el.panelCamera.css({
-                'height': 'calc(100% - 120px)'
             });
 
-        });
+            this.el.inputPhoto.on('change', e => {
 
-        this.el.btnClosePanelCamera.on('click', e => {
+                console.log(this.el.inputPhoto.files);
 
-            this.closeAllMainPanel();
-            this.el.panelMessagesContainer.show();
-        });
+                [...this.el.inputPhoto.files].forEach(file => {
+                    console.log(file);
+                });
 
-        this.el.btnTakePicture.on('click', e => {
-            console.log('take picture');
-        })
-
-        this.el.btnAttachDocument.on('click', e => {
-            
-            this.closeAllMainPanel();
-            this.el.panelDocumentPreview.addClass('open');
-            this.el.panelDocumentPreview.css({
-                'height': 'calc(100% - 120px)'
             });
-        });
 
-        this.el.btnClosePanelDocumentPreview.on('click', e => {
+            this.el.btnAttachCamera.on('click', e => {
+                
+                this.closeAllMainPanel();
+                this.el.panelCamera.addClass('open');
+                this.el.panelCamera.css({
+                    'height': 'calc(100% - 120px)'
+                });
 
-            this.closeAllMainPanel();
-            this.el.panelMessagesContainer.show();
-        })
+            });
 
-        this.el.btnSendDocument.on('click', e => {
+            this.el.btnClosePanelCamera.on('click', e => {
 
-            console.log('send document');
-        })
+                this.closeAllMainPanel();
+                this.el.panelMessagesContainer.show();
+            });
 
-        this.el.btnAttachContact.on('click', e => {
-            
-            this.el.modalContacts.show();
-        });
+            this.el.btnTakePicture.on('click', e => {
+                console.log('take picture');
+            })
 
-        this.el.btnCloseModalContacts.on('click', e =>{
-            this.el.modalContacts.hide();
-        });
+            this.el.btnAttachDocument.on('click', e => {
+                
+                this.closeAllMainPanel();
+                this.el.panelDocumentPreview.addClass('open');
+                this.el.panelDocumentPreview.css({
+                    'height': 'calc(100% - 120px)'
+                });
+            });
 
-        this.el.btnSendMicrophone.on('click', e =>{
-            this.el.recordMicrophone.show();
-            this.el.btnSendMicrophone.hide(); 
-            this.startRecordMicrophoneTime();    
-        });
+            this.el.btnClosePanelDocumentPreview.on('click', e => {
 
-        this.el.btnCancelMicrophone.on('click', e =>{
-            this.closeRecordMicrophone()
-        });
+                this.closeAllMainPanel();
+                this.el.panelMessagesContainer.show();
+            })
 
-        this.el.btnFinishMicrophone.on('click', e =>{            
-            this.closeRecordMicrophone()
-        });
+            this.el.btnSendDocument.on('click', e => {
 
-        this.el.inputText.on('keypress', e =>{
+                console.log('send document');
+            })
 
-            if(e.key === 'Enter' && !e.ctrlKey) {
+            this.el.btnAttachContact.on('click', e => {
+                
+                this.el.modalContacts.show();
+            });
 
-                e.preventDefault();
-                this.el.btnSend.click();
+            this.el.btnCloseModalContacts.on('click', e =>{
+                this.el.modalContacts.hide();
+            });
 
-            }
-        });
+            this.el.btnSendMicrophone.on('click', e =>{
+                this.el.recordMicrophone.show();
+                this.el.btnSendMicrophone.hide(); 
+                this.startRecordMicrophoneTime();    
+            });
+
+            this.el.btnCancelMicrophone.on('click', e =>{
+                this.closeRecordMicrophone()
+            });
+
+            this.el.btnFinishMicrophone.on('click', e =>{            
+                this.closeRecordMicrophone()
+            });
+
+            this.el.inputText.on('keypress', e =>{
+
+                if(e.key === 'Enter' && !e.ctrlKey) {
+
+                    e.preventDefault();
+                    this.el.btnSend.click();
+
+                }
+            });
 
 
-        this.el.inputText.on('keyup', e =>{
+            this.el.inputText.on('keyup', e =>{
 
-            if (this.el.inputText.innerText.trim().length){         //ignora as tags html ocultas e espaços em branco
+                const hasText = this.el.inputText.innerText.trim().length > 0;
+                const hasEmoji = this.el.inputText.querySelectorAll('img').length > 0;
 
-                this.el.inputPlaceholder.hide();
-                this.el.btnSendMicrophone.hide();
-                this.el.btnSend.show();
+                if (hasText || hasEmoji) {
 
-            } else {
+                    this.el.inputPlaceholder.hide();
+                    this.el.btnSendMicrophone.hide();
+                    this.el.btnSend.show();
 
-                this.el.inputText.innerHTML = "";
+                } else {
 
-                this.el.inputPlaceholder.show();
-                this.el.btnSend.hide();
-                this.el.btnSendMicrophone.show();
-            }
+                    this.el.inputText.innerHTML = "";
+                    this.el.inputPlaceholder.show();
+                    this.el.btnSend.hide();
+                    this.el.btnSendMicrophone.show();
+                }
 
-        });
+            });
 
-        this.el.btnSend.on('click', e =>{
-            console.log( this.el.inputText.innerHTML);
-        })
+            this.el.btnSend.on('click', e =>{
+                console.log( this.el.inputText.innerHTML);
+            })
 
-        this.el.btnEmojis.on('click', e =>{
-            this.el.panelEmojis.toggleClass('open');
-        })
+            this.el.btnEmojis.on('click', e =>{
+                this.el.panelEmojis.toggleClass('open');
+            })
+
+        
 
         this.el.panelEmojis.querySelectorAll('.emojik').forEach(emoji => {
            
