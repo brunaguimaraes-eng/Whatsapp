@@ -445,8 +445,8 @@ select{
     border:0
 }
 .emoji{
-    width:20px;
-    height:20px
+    width:10px;
+    height:10px
 }
 .emojik{
     width:32px;
@@ -16135,5 +16135,31 @@ html[dir=rtl] ._2ICcy:after{
 }
 #main {
     display:none;
+}
+
+/* Mantém o tamanho original de 32px para o sprite não quebrar, mas encolhe visualmente */
+#input-text .emojik {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    margin: 0 -3px !important; /* Margem negativa para compensar o espaço em branco do scale */
+    
+    /* Encolhe o emoji de 32px para 20px perfeitamente de forma vetorial */
+    transform: scale(0.625) !important; 
+    -webkit-transform: scale(0.625) !important;
+    -moz-transform: scale(0.625) !important;
+    
+    /* Garante que o ponto central do encolhimento seja o meio dele */
+    transform-origin: center center !important;
+}
+
+/* Evita que regras antigas de .emoji esmaguem o clone para 10px */
+#input-text img.emoji {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+/* Garante que se houver um emoji (tag img), o placeholder suma */
+#input-text:has(img) ~ #input-placeholder {
+    display: none !important;
 }
 
