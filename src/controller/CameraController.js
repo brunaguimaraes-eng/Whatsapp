@@ -5,13 +5,22 @@ export class CameraController {
         this._videoEl = videoEl;
         navigator.mediaDevices.getUserMedia({
             video:true
-        }).then(stream => {
+        }).then(stream => {          
 
+            this._stream = stream;
             this._videoEl.srcObject = stream;           //a forma como está no curso está depreciado e foi removido, não é mais utilizado, inserido o comando no padrão atual
             this._videoEl.play();
         }).catch(err=>{
             console.error(err);
         })
+
+    }
+
+    stop(){
+
+        this._stream.getTracks().forEach(track => {
+            track.stop();        
+        });
 
     }
 

@@ -11,9 +11,9 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                use: 'babel-loader'
+                test: /\.js$/,              //todo arquivo .js
+                exclude: /node_modules/,    // exceto os da pasta node_modules
+                use: 'babel-loader'         // passa pelo babel antes de empacotar
             }
         ]
     },
