@@ -7,7 +7,7 @@ class CameraController {
             video:true
         }).then(stream => {
 
-            this._videoEl.srcObject = stream;           //a forma como está no curso está preciado e foi removido, não é mais utilizado, inserido o comando no padrão atual
+            this._videoEl.srcObject = stream;           //a forma como está no curso está depreciado e foi removido, não é mais utilizado, inserido o comando no padrão atual
             this._videoEl.play();
         }).catch(err=>{
             console.error(err);
