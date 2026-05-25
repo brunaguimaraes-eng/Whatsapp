@@ -223,7 +223,11 @@ export class WhatAppController{
             });
 
             this.el.btnTakePicture.on('click', e => {
-                console.log('take picture');
+                let dataUrl = this._camera.takePicture();
+
+                this.el.pictureCamera.src = dataUrl;
+                this.el.pictureCamera.show();
+                this.el.videoCamera.hide();
             })
 
             this.el.btnAttachDocument.on('click', e => {

@@ -16115,11 +16115,17 @@ html[dir=rtl] ._2ICcy:after{
      display: none;
 }
  .video-container {
-     width: 100%;
-     height: 100%;
-     max-width: 885px;
-     max-height: 664px;
-     margin: 0 auto;
+    text-align: center;
+}
+
+#video-camera {
+    max-width: 100%;
+    height: auto;
+}
+
+#picture-camera {
+    max-width: 100%;
+    height: auto;
 }
  .btn-reshoot {
      cursor: pointer;
@@ -16162,4 +16168,3 @@ html[dir=rtl] ._2ICcy:after{
 #input-text:has(img) ~ #input-placeholder {
     display: none !important;
 }
-
