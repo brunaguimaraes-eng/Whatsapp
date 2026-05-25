@@ -1,4 +1,6 @@
-class WhatAppController{
+import {Format} from './../util/Format.js';
+import {CameraController} from './CameraController.js';
+export class WhatAppController{
 
     constructor(){
 
@@ -204,9 +206,10 @@ class WhatAppController{
                 this.closeAllMainPanel();
                 this.el.panelCamera.addClass('open');
                 this.el.panelCamera.css({
-                    'height': 'calc(100% - 120px)'
+                    'height': 'calc(100% - 5px)'
                 });
 
+                
                 this._camera = new CameraController(this.el.videoCamera);
 
 

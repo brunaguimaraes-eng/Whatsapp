@@ -1,4 +1,4 @@
-class Format {
+export class Format {
 
 /**
  Converte uma string com hifens para camelCase. Utiliza a API nativa de 'dataset' do navegador para realizar a conversão 
