@@ -14774,10 +14774,10 @@ html[dir=rtl] ._2k1om .xVBLL,html[dir=rtl] .r4crx ._2-_Pl{
     height:calc(100% - 60px)
 }
 .r4crx ._2GgBs{
-    height:40px
+    height:auto;
 }
 html[dir] .r4crx ._2GgBs{
-    padding-top:40px;
+    padding-top:8px;
     text-align:center
 }
 .r4crx ._3m_5X{

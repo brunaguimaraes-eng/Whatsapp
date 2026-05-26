@@ -267,6 +267,10 @@ export class WhatAppController{
 
                 if(this.el.inputDocument.files.length){
 
+                this.el.panelDocumentPreview.css({
+                    'height': '1%'
+                });
+
                 let file = this.el.inputDocument.files[0];
                 
                 this._documentPreviewController = new DocumentPreviewController(file);
@@ -278,15 +282,21 @@ export class WhatAppController{
                     this.el.imagePanelDocumentPreview.show();
                     this.el.filePanelDocumentPreview.hide();
 
+                    this.el.panelDocumentPreview.css({
+                        'height': 'calc(100% - 120px)'
+                    });
+
                 }).catch(err =>{
 
-                    
-
+                    this.el.panelDocumentPreview.css({
+                        'height': 'calc(100% - 120px)'
+                    });
+                                    
                     switch (file.type) {
 
                         case 'application/vnd.ms-excel':
                         case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-excel';
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-xls';
                         
                         break;
                        
