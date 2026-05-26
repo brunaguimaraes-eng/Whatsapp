@@ -356,6 +356,11 @@ export class WhatAppController{
                 this.startRecordMicrophoneTime();
                 
                 this._microphoneController = new MicrophoneController();
+                
+                this._microphoneController.on('play', musica => {
+                    console.log('recebi o evento play', musica);
+                });
+
             });
 
             this.el.btnCancelMicrophone.on('click', e =>{

@@ -1,16 +1,25 @@
-export class MicrophoneController {
+import { ClassEvent } from "../util/ClassEvent";
+
+export class MicrophoneController extends ClassEvent {
 
     constructor() {
+
+        super();
+
         navigator.mediaDevices.getUserMedia({               //pede permissão para usar o MIC
             audio: true
         }).then(stream => {
 
             this._stream = stream;
-            this._mediaRecorder = new MediaRecorder(stream);           //objeto que sabe gravar o strem
+            this._mediaRecorder = new MediaRecorder(stream);           //objeto que sabe gravar o stream
             this._audioChunks = [];                                    //array vazio que vai guardar os pedaços do áudio gravado
 
-            this._mediaRecorder.ondataavailable = e => {          //enquanto grava o mediarecorder vai "despejando" os pedaços do audio, vada pedaço vai sendo empurrado pro array
-                this._audioChunks.push(e.data);
+            this._mediaRecorder.start();
+
+            this._mediaRecorder.onstop = () => {
+                let blob = new Blob(this._audioChunks, { type: 'audio/mpeg' });
+                let audio = new Audio(URL.createObjectURL(blob));
+                this.trigger('play', audio); 
             };
 
         }).catch(err => {
