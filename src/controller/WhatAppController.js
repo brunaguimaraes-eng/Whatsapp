@@ -1,5 +1,6 @@
 import {Format} from './../util/Format.js';
 import {CameraController} from './CameraController.js';
+import {MicrophoneController} from './MicrophoneController.js';
 import {DocumentPreviewController} from './DocumentPreviewController.js';
 export class WhatAppController{
 
@@ -94,7 +95,7 @@ export class WhatAppController{
 
             });
 
-            return json;
+            //return json;
 
         }
 
@@ -103,7 +104,7 @@ export class WhatAppController{
 
     initEvents(){
 
-        console.log(this.el);
+        //console.log(this.el);
 
             this.el.myPhoto.on('click', e=>{
 
@@ -352,14 +353,18 @@ export class WhatAppController{
             this.el.btnSendMicrophone.on('click', e =>{
                 this.el.recordMicrophone.show();
                 this.el.btnSendMicrophone.hide(); 
-                this.startRecordMicrophoneTime();    
+                this.startRecordMicrophoneTime();
+                
+                this._microphoneController = new MicrophoneController();
             });
 
             this.el.btnCancelMicrophone.on('click', e =>{
+                if (this._microphoneController) this._microphoneController.stop();
                 this.closeRecordMicrophone()
             });
 
             this.el.btnFinishMicrophone.on('click', e =>{            
+                if (this._microphoneController) this._microphoneController.stop();
                 this.closeRecordMicrophone()
             });
 
