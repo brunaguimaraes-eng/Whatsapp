@@ -4,45 +4,84 @@ export class MicrophoneController extends ClassEvent {
 
     constructor() {
 
-        super();
+    super();
 
-        navigator.mediaDevices.getUserMedia({               //pede permissão para usar o MIC
-            audio: true
-        }).then(stream => {
+    this._mimeType = 'audio/webm;codecs=opus';
 
+    this._available = false;
+
+    navigator.mediaDevices.getUserMedia({               //pede permissão para usar o MIC
+        audio: true
+    }).then(stream => {
+
+            this._available = true;
             this._stream = stream;
-            this._mediaRecorder = new MediaRecorder(stream);           //objeto que sabe gravar o stream
-            this._audioChunks = [];                                    //array vazio que vai guardar os pedaços do áudio gravado
-
-            this._mediaRecorder.start();
-
-            this._mediaRecorder.onstop = () => {
-                let blob = new Blob(this._audioChunks, { type: 'audio/mpeg' });
-                let audio = new Audio(URL.createObjectURL(blob));
-                this.trigger('play', audio); 
-            };
+            this.trigger('ready', this._stream);
 
         }).catch(err => {
             console.error(err);
         });
     }
 
-    startRecording() {
-        this._audioChunks = [];
-        this._mediaRecorder.start();
+    isAvailable(){
+        return this._available;
     }
 
-    stopRecording() {                          //para a gravação, junto tudo num BLOB, converte em URL e resolve a promise com essa URL.
-        return new Promise(resolve => {
-            this._mediaRecorder.onstop = () => {
-                let blob = new Blob(this._audioChunks, { type: 'audio/mpeg' });
-                resolve(URL.createObjectURL(blob));
-            };
+    startRecorder() {
+        
+        if(this.isAvailable()){
+
+            this._mediaRecorder = new MediaRecorder(this._stream,);
+
+            this._recordedChunks = [];
+
+            this._mediaRecorder.addEventListener('dataavailable', e => {
+
+                if (e.data.size > 0) this._recordedChunks.push(e.data);
+
+            });
+
+            this._mediaRecorder.addEventListener('stop', e =>{
+
+            let blob = new Blob(this._recordedChunks, {
+                    type: this._mimeType
+                });
+
+                let filename = `rec${Date.now()}.webm`;
+
+                let file = new File([blob], filename, {
+                    type: this._mimeType,
+                    lastModified: Date.now()
+                });
+
+                console.log('file', file);
+
+                let reader = new FileReader();
+
+                reader.onload = e => {
+
+                    console.log('reader file', file);
+
+                    let audio = new Audio(reader.result);
+
+                    audio.play();                    
+                }
+
+                reader.readAsDataURL(file);
+
+            });
+            
+            this._mediaRecorder.start();
+
+        };
+    };
+
+    stopRecorded(){
+
+        if (this.isAvailable()){
+
             this._mediaRecorder.stop();
-        });
+            this._stream.getTracks().forEach(track => track.stop());
+        }
     }
-
-    stop() {
-        this._stream.getTracks().forEach(track => track.stop());
-    }
-}
+};
