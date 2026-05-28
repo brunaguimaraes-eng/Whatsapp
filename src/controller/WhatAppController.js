@@ -2,6 +2,7 @@ import {Format} from './../util/Format.js';
 import {CameraController} from './CameraController.js';
 import {MicrophoneController} from './MicrophoneController.js';
 import {DocumentPreviewController} from './DocumentPreviewController.js';
+import {Firebase} from '../util/Firebase.js';
 export class WhatAppController{
 
     constructor(){
@@ -9,6 +10,7 @@ export class WhatAppController{
         this.elementsPrototype();
         this.loadElements();
         this.initEvents();
+        this._firebase - new Firebase();
         
     }   
 
