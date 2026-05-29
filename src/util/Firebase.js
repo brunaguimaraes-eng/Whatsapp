@@ -1,36 +1,23 @@
-import * as firebase from 'firebase/app';
-import 'firebase/firestore';
-import 'firebase/storage';
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
-export class Firebase {
+// Configuração oficial do seu projeto Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyDfjsf7GQsLOqjTmPHHFPDxuTVmDcEwLOs",
+  authDomain: "whatsapp-hcode.firebaseapp.com",
+  projectId: "whatsapp-hcode",
+  storageBucket: "whatsapp-hcode.firebasestorage.app",
+  messagingSenderId: "124790784670",
+  appId: "1:124790784670:web:d28ab50d863bc376db718f",
+  measurementId: "G-9TQ7KGE35D"
+};
 
-    constructor(){
+// Inicializa o Firebase
+const app = initializeApp(firebaseConfig);
 
-        this._config = {
-            apiKey: "AIzaSyDfjsf7GQsLOqjTmPHHFPDxuTVmDcEwLOs",
-            authDomain: "whatsapp-hcode.firebaseapp.com",
-            projectId: "whatsapp-hcode",
-            storageBucket: "whatsapp-hcode.firebasestorage.app",
-            messagingSenderId: "124790784670",
-            appId: "1:124790784670:web:ca8cc455b6104200db718f"
-        }
-
-        this.init();
-    }
-
-    init(){
-        
-        if(!this._initialize){
-            firebase.initializeApp(this._config);
-            this._initialize = true;
-        }
-    }
-
-    static db(){
-        return firebase.firestore();
-    }
-
-    static hd(){
-        return firebase.storage();
-    }
-}
+// Cria e exporta as instâncias dos serviços que você vai usar no WhatsApp
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);

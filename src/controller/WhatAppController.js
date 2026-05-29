@@ -1,16 +1,19 @@
-import {Format} from './../util/Format.js';
-import {CameraController} from './CameraController.js';
-import {MicrophoneController} from './MicrophoneController.js';
-import {DocumentPreviewController} from './DocumentPreviewController.js';
-import {Firebase} from '../util/Firebase.js';
+import { Format } from './../util/Format.js';
+import { CameraController } from './CameraController.js';
+import { MicrophoneController } from './MicrophoneController.js';
+import { DocumentPreviewController } from './DocumentPreviewController.js';
+import { db, auth, storage } from './../util/Firebase.js';
 export class WhatAppController{
 
     constructor(){
 
+        this._db = db;
+        this._auth = auth;
+        this._storage = storage;
         this.elementsPrototype();
         this.loadElements();
         this.initEvents();
-        this._firebase - new Firebase();
+        
         
     }   
 
@@ -106,7 +109,7 @@ export class WhatAppController{
 
     initEvents(){
 
-        //console.log(this.el);
+        console.log(this.el);
 
             this.el.myPhoto.on('click', e=>{
 
@@ -167,7 +170,7 @@ export class WhatAppController{
 
                 e.preventDefault();
 
-                let formData = new formData(this.el.formPanelAddContact);
+                let formData = new FormData(this.el.formPanelAddContact);
 
             });
 
