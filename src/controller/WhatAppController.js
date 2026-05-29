@@ -2,7 +2,7 @@ import { Format } from './../util/Format.js';
 import { CameraController } from './CameraController.js';
 import { MicrophoneController } from './MicrophoneController.js';
 import { DocumentPreviewController } from './DocumentPreviewController.js';
-import { db, auth, storage, initAuth, logout } from './../util/Firebase.js'; // Incluído o logout
+import { db, auth, storage, initAuth, logout, doc, setDoc } from './../util/Firebase.js';
 import { onAuthStateChanged } from 'firebase/auth'; // Incluído o observador nativo
 
 export class WhatAppController{
@@ -23,6 +23,9 @@ export class WhatAppController{
         onAuthStateChanged(this._auth, (user) => {
             if (user) {
                 console.log("Usuário autenticado e ativo:", user.displayName);
+
+                // Salvar/Atualizar o usuário no Banco de Dados
+                this.saveUserInFirestore(user);
                 
                 // 1. Remove o botão de login da tela (se ele existir) para não ficar lixo no HTML
                 const elementoLogin = document.getElementById('custom-login-container');
@@ -96,6 +99,29 @@ export class WhatAppController{
             }
         });
     }
+
+    saveUserInFirestore(user) {
+            // Cria uma referência para o documento usando o UID único do usuário do Firebase como ID do documento
+            const userRef = doc(this._db, "users", user.uid);
+
+            // Dados que queremos salvar/atualizar
+            const userData = {
+                name: user.displayName,
+                email: user.email,
+                photo: user.photoURL,
+                updatedAt: new Date() // Guarda o momento do último acesso
+            };
+
+            // Salva no Firestore. O { merge: true } garante que não vai sobrescrever outros dados antigos
+            setDoc(userRef, userData, { merge: true })
+                .then(() => {
+                    console.log("Dados do usuário sincronizados com o Firestore com sucesso!");
+                })
+                .catch(err => {
+                    console.error("Erro ao salvar usuário no Firestore:", err);
+                });
+        }
+    
 
     loadElements(){
 

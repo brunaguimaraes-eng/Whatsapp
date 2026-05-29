@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // Configuração oficial do seu projeto Firebase
@@ -47,5 +47,7 @@ export function initAuth() {
 }
 
 export function logout() {
-        return signOut(auth); // Retorna a promise de deslogar do Firebase
-    }
+    return signOut(auth); // Retorna a promise de deslogar do Firebase
+}
+
+export { doc, setDoc };
