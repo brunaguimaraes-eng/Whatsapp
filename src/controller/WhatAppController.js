@@ -2,20 +2,59 @@ import { Format } from './../util/Format.js';
 import { CameraController } from './CameraController.js';
 import { MicrophoneController } from './MicrophoneController.js';
 import { DocumentPreviewController } from './DocumentPreviewController.js';
-import { db, auth, storage } from './../util/Firebase.js';
+import { db, auth, storage, initAuth, logout } from './../util/Firebase.js'; // Incluído o logout
+import { onAuthStateChanged } from 'firebase/auth'; // Incluído o observador nativo
+
 export class WhatAppController{
 
     constructor(){
-
+        
         this._db = db;
         this._auth = auth;
         this._storage = storage;
         this.elementsPrototype();
         this.loadElements();
         this.initEvents();
-        
+        this.initAuth();
         
     }   
+
+    initAuth() {
+        // Escuta em tempo real se o usuário está logado ou não
+        onAuthStateChanged(this._auth, (user) => {
+            if (user) {
+                console.log("Usuário autenticado e ativo:", user.displayName);
+                
+                // Se o usuário existir, mostra o layout do WhatsApp Clone
+                if (this.el.app) this.el.app.show();
+                
+                // Atualiza o círculo cinza com a foto real do Google do usuário
+                if (user.photoURL && this.el.myPhoto) {
+                    // Seleciona a tag img dentro da div #my-photo
+                    const imgTag = this.el.myPhoto.querySelector('img');
+                    if (imgTag) {
+                        imgTag.src = user.photoURL;
+                        imgTag.style.display = 'block'; // Torna a imagem visível
+                    }
+                }
+                
+            } else {
+                console.log("Nenhum usuário logado. Bloqueando aplicação...");
+                
+                // Esconde o layout inteiro para proteção de dados
+                if (this.el.app) this.el.app.hide();
+                
+                // Dispara o pop-up do Google imediatamente na tela
+                initAuth()
+                    .then(response => {
+                        console.log("Login restaurado com sucesso!");
+                    })
+                    .catch(err => {
+                        console.error("Janela de autenticação fechada:", err);
+                    });
+            }
+        });
+    }
 
     loadElements(){
 
@@ -109,17 +148,31 @@ export class WhatAppController{
 
     initEvents(){
 
-        console.log(this.el);
+        //console.log(this.el);
 
-            this.el.myPhoto.on('click', e=>{
+        this.el.myPhoto.on('click', e => {
 
-                this.closeAllLeftPanel();
-                this.el.panelEditProfile.show();
-                setTimeout(() =>{
-                    this.el.panelEditProfile.addClass('open');
-                },300);           
+            // 1. Se clicar segurando a tecla SHIFT, faz o Logout
+            if (e.shiftKey) {
+                logout()
+                    .then(() => {
+                        console.log("Deslogado com sucesso pelo clique com Shift!");
+                    })
+                    .catch(err => {
+                        console.error("Erro ao deslogar:", err);
+                    });
+                    
+                return; // Impede que o código de baixo rode junto
+            }
 
-            });
+            // 2. Se clicar NORMAL (sem Shift), roda o código original:
+            this.closeAllLeftPanel();
+            this.el.panelEditProfile.show();
+            setTimeout(() => {
+                this.el.panelEditProfile.addClass('open');
+            }, 300);
+
+        });
 
             this.el.btnNewContact.on('click', e=>{
 
