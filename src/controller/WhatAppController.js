@@ -20,38 +20,79 @@ export class WhatAppController{
     }   
 
     initAuth() {
-        // Escuta em tempo real se o usuário está logado ou não
         onAuthStateChanged(this._auth, (user) => {
             if (user) {
                 console.log("Usuário autenticado e ativo:", user.displayName);
                 
-                // Se o usuário existir, mostra o layout do WhatsApp Clone
+                // 1. Remove o botão de login da tela (se ele existir) para não ficar lixo no HTML
+                const elementoLogin = document.getElementById('custom-login-container');
+                if (elementoLogin) elementoLogin.remove();
+
+                // 2. Mostra o layout do WhatsApp normalmente
                 if (this.el.app) this.el.app.show();
                 
-                // Atualiza o círculo cinza com a foto real do Google do usuário
+                // Trata a foto de perfil do Google (com a proteção contra imagem quebrada)
                 if (user.photoURL && this.el.myPhoto) {
-                    // Seleciona a tag img dentro da div #my-photo
                     const imgTag = this.el.myPhoto.querySelector('img');
                     if (imgTag) {
+                        imgTag.onerror = () => { imgTag.style.display = 'none'; };
+                        imgTag.onload = () => { imgTag.style.display = 'block'; };
                         imgTag.src = user.photoURL;
-                        imgTag.style.display = 'block'; // Torna a imagem visível
                     }
                 }
                 
             } else {
                 console.log("Nenhum usuário logado. Bloqueando aplicação...");
                 
-                // Esconde o layout inteiro para proteção de dados
+                // 1. Esconde a tela do WhatsApp Clone
                 if (this.el.app) this.el.app.hide();
                 
-                // Dispara o pop-up do Google imediatamente na tela
-                initAuth()
-                    .then(response => {
-                        console.log("Login restaurado com sucesso!");
-                    })
-                    .catch(err => {
-                        console.error("Janela de autenticação fechada:", err);
-                    });
+                // 2. Cria o botão de login na tela
+                if (!document.getElementById('custom-login-container')) {
+                    
+                    // Cria uma caixinha centralizada na tela
+                    const loginContainer = document.createElement('div');
+                    loginContainer.id = 'custom-login-container';
+                    loginContainer.style.cssText = `
+                        position: fixed;
+                        top: 0; left: 0; width: 100vw; height: 100vh;
+                        background-color: #00bfa5;
+                        display: flex; flex-direction: column;
+                        justify-content: center; align-items: center;
+                        z-index: 99999; font-family: sans-serif;
+                    `;
+
+                    // Cria um título bonito
+                    const titulo = document.createElement('h1');
+                    titulo.innerText = "Bem Vindo!";
+                    titulo.style.cssText = "color: white; margin-bottom: 20px;";
+
+                    // Cria o botão de verdade
+                    const botaoLogin = document.createElement('button');
+                    botaoLogin.innerText = "Conectar com o Google";
+                    botaoLogin.style.cssText = `
+                        padding: 15px 30px; font-size: 18px; font-weight: bold;
+                        background-color: white; color: #00bfa5;
+                        border: none; border-radius: 5px; cursor: pointer;
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    `;
+
+                    // Quando clicar NO BOTÃO, aí sim o pop-up do Google aparece!
+                    botaoLogin.onclick = () => {
+                        initAuth()
+                            .then(response => {
+                                console.log("Login feito via clique no botão!");
+                            })
+                            .catch(err => {
+                                console.error("Erro ao clicar no botão de login:", err);
+                            });
+                    };
+
+                    // Monta a tela de login e joga ela no corpo da página
+                    loginContainer.appendChild(titulo);
+                    loginContainer.appendChild(botaoLogin);
+                    document.body.appendChild(loginContainer);
+                }
             }
         });
     }
