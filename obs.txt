@@ -1,0 +1,38 @@
+RESUMOS DOS DATA
+
+1. O this._data (O Baú de Dados do Model)
+Esse cara mora dentro do Model.js e do User.js.
+O que ele é: Ele é um objeto privado (um "baú") que criamos na memória do computador para guardar as informações reais do usuário atual.
+Onde ele aparece: this._data = {}, this._data.name, this._data.photo.
+Analogia: Pense nele como a folha de papel onde você anota a ficha cadastral do usuário.
+
+2. O data do evento 'datachange' (A Cópia que vai para a Tela)
+Esse cara aparece como o parâmetro daquela função de alarme dentro do seu Controlador (WhatAppController.js).
+O que ele é: Ele é uma cópia dos dados do baú que o Model envia para o Controlador quando algo muda.
+Onde ele aparece: this._user.on('datachange', data => { ... }).
+Analogia: É como se o Model tirasse uma xerox da folha de papel (this._data) e jogasse na mesa do Controlador para ele ler e atualizar a tela 
+(mudar o título da aba, mudar a foto do topo).
+
+3. O docSnapshot.data() (O comando de abrir a caixa do Firebase)
+Esse cara é um método nativo que pertence ao Firebase.
+O que ele é: É a função que usamos para extrair os dados de dentro daquela caixa lacrada (docSnapshot) que o banco de dados nos enviou.
+Onde ele aparece: this.fromJSON(docSnapshot.data()).
+Analogia: É o ato de abrir o envelope que veio do correio e puxar as informações puros de lá de dentro.
+
+4. O userData (A variável temporária de envio)
+Esse cara aparece no método saveUserInFirestore(user) dentro do seu Controlador.
+O que ele é: É apenas um objeto temporário que você monta na hora para enviar para o Firebase.
+Onde ele aparece: const userData = { name: user.displayName, ... }.
+Analogia: É o pacote que você embrulha na hora de mandar uma mercadoria de volta para o fornecedor.
+
+[ FIRESTORE ] ── entrega uma caixa ──> [ docSnapshot ]
+                                             │
+                                      .data() abre a caixa
+                                             │
+                                             ▼
+ [ Model / User ] ── guarda no baú ──> [ this._data ]
+                                             │
+                                     trigger('datachange')
+                                             │
+                                             ▼
+ [ Controlador ] ── recebe a cópia ──> ( data ) ──> Atualiza a Tela!

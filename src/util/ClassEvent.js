@@ -2,11 +2,10 @@ export class ClassEvent {
 
     constructor(){
 
-        this._events = {}; 
+        this._events = {};   //cria um array vazio que servirá como um "catálogo"
     }
 
-    on(eventName, fn){
-
+    on(eventName, fn){                         //
         if(!this._events[eventName]) this._events[eventName] = new Array();
 
         this._events[eventName].push(fn);

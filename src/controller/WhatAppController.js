@@ -2,8 +2,9 @@ import { Format } from './../util/Format.js';
 import { CameraController } from './CameraController.js';
 import { MicrophoneController } from './MicrophoneController.js';
 import { DocumentPreviewController } from './DocumentPreviewController.js';
-import { db, auth, storage, initAuth, logout, doc, setDoc } from './../util/Firebase.js';
-import { onAuthStateChanged } from 'firebase/auth'; // Incluído o observador nativo
+import { db, auth, storage, initAuth as loginFirebase, logout, doc, setDoc } from './../util/Firebase.js';
+import { onAuthStateChanged } from 'firebase/auth';
+import { User } from '../model/User.js';
 
 export class WhatAppController{
 
@@ -20,107 +21,112 @@ export class WhatAppController{
     }   
 
     initAuth() {
-        onAuthStateChanged(this._auth, (user) => {
+        onAuthStateChanged(this._auth, (user) => {                         //escutador nativo do firebase, vigia o app o tempo todo
             if (user) {
+
                 console.log("Usuário autenticado e ativo:", user.displayName);
+                                
+                this._user = new User(user.email); 
 
-                // Salvar/Atualizar o usuário no Banco de Dados
-                this.saveUserInFirestore(user);
-                
-                // 1. Remove o botão de login da tela (se ele existir) para não ficar lixo no HTML
-                const elementoLogin = document.getElementById('custom-login-container');
-                if (elementoLogin) elementoLogin.remove();
+                this._user.on('datachange', data => {
+    
+                    // Atualiza dinamicamente o título da aba do navegador com o nome do usuário
+                    document.querySelector('title').innerHTML = data.name + ' - WhatsApp Clone';
 
-                // 2. Mostra o layout do WhatsApp normalmente
-                if (this.el.app) this.el.app.show();
-                
-                // Trata a foto de perfil do Google (com a proteção contra imagem quebrada)
-                if (user.photoURL && this.el.myPhoto) {
-                    const imgTag = this.el.myPhoto.querySelector('img');
-                    if (imgTag) {
-                        imgTag.onerror = () => { imgTag.style.display = 'none'; };
-                        imgTag.onload = () => { imgTag.style.display = 'block'; };
-                        imgTag.src = user.photoURL;
+                    if (data.photo) {
+                        // Injeta a foto do banco no painel lateral de Editar Perfil]
+                        let photo = this.el.imgPanelEditProfile;
+                        photo.src = data.photo;
+                        photo.show();
+                        this.el.imgDefaultPanelEditProfile.hide();
+
+                        //Injeta a foto também no avatar principal do topo esquerdo
+                        let photo2 = this.el.myPhoto.querySelector('img');
+                        if (photo2) {
+                            photo2.src = data.photo;
+                            photo2.show();
+                        }
                     }
-                }
+                });
+
+                
+                User.findByEmail(user.email).then(snapshot => {    //buscamos o e-mail no banco, criamos ou atualizamos e removemos a tela verde       
+
+                    this.saveUserInFirestore(user);
+                    
+                    const elementoLogin = document.getElementById('custom-login-container');
+                    if (elementoLogin) elementoLogin.remove();
+
+                    if (this.el.app) this.el.app.show();
+                    
+                    if (user.photoURL && this.el.myPhoto) {
+                        const imgTag = this.el.myPhoto.querySelector('img');
+                        if (imgTag) {
+                            imgTag.onerror = () => { imgTag.style.display = 'none'; };
+                            imgTag.onload = () => { imgTag.style.display = 'block'; };
+                            imgTag.src = user.photoURL;
+                        }
+                    }
+
+                }).catch(err => {
+                    console.error("Erro ao buscar e-mail no Firestore:", err);
+                });
                 
             } else {
                 console.log("Nenhum usuário logado. Bloqueando aplicação...");
                 
-                // 1. Esconde a tela do WhatsApp Clone
                 if (this.el.app) this.el.app.hide();
                 
-                // 2. Cria o botão de login na tela
                 if (!document.getElementById('custom-login-container')) {
                     
-                    // Cria uma caixinha centralizada na tela
                     const loginContainer = document.createElement('div');
                     loginContainer.id = 'custom-login-container';
                     loginContainer.style.cssText = `
-                        position: fixed;
-                        top: 0; left: 0; width: 100vw; height: 100vh;
-                        background-color: #00bfa5;
-                        display: flex; flex-direction: column;
-                        justify-content: center; align-items: center;
-                        z-index: 99999; font-family: sans-serif;
+                    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                    background-color: #00bfa5; display: flex; flex-direction: column;
+                    justify-content: center; align-items: center; z-index: 99999; font-family: sans-serif;
                     `;
 
-                    // Cria um título bonito
                     const titulo = document.createElement('h1');
                     titulo.innerText = "Bem Vindo!";
                     titulo.style.cssText = "color: white; margin-bottom: 20px;";
 
-                    // Cria o botão de verdade
                     const botaoLogin = document.createElement('button');
                     botaoLogin.innerText = "Conectar com o Google";
                     botaoLogin.style.cssText = `
-                        padding: 15px 30px; font-size: 18px; font-weight: bold;
-                        background-color: white; color: #00bfa5;
-                        border: none; border-radius: 5px; cursor: pointer;
-                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    padding: 15px 30px; font-size: 18px; font-weight: bold;
+                    background-color: white; color: #00bfa5; border: none; border-radius: 5px;
+                    cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                     `;
 
-                    // Quando clicar NO BOTÃO, aí sim o pop-up do Google aparece!
                     botaoLogin.onclick = () => {
-                        initAuth()
-                            .then(response => {
-                                console.log("Login feito via clique no botão!");
-                            })
-                            .catch(err => {
-                                console.error("Erro ao clicar no botão de login:", err);
-                            });
+                        loginFirebase()
+                        .then(response => { console.log("Login feito via clique no botão!"); })
+                        .catch(err => { console.error("Erro ao clicar no botão de login:", err); });
                     };
 
-                    // Monta a tela de login e joga ela no corpo da página
                     loginContainer.appendChild(titulo);
                     loginContainer.appendChild(botaoLogin);
                     document.body.appendChild(loginContainer);
                 }
             }
-        });
+        }); 
     }
 
     saveUserInFirestore(user) {
-            // Cria uma referência para o documento usando o UID único do usuário do Firebase como ID do documento
-            const userRef = doc(this._db, "users", user.uid);
+        const userRef = doc(this._db, "users", user.email);
 
-            // Dados que queremos salvar/atualizar
-            const userData = {
-                name: user.displayName,
-                email: user.email,
-                photo: user.photoURL,
-                updatedAt: new Date() // Guarda o momento do último acesso
-            };
+        const userData = {
+            name: user.displayName,
+            email: user.email,
+            photo: user.photoURL,
+            updatedAt: new Date()
+        };
 
-            // Salva no Firestore. O { merge: true } garante que não vai sobrescrever outros dados antigos
-            setDoc(userRef, userData, { merge: true })
-                .then(() => {
-                    console.log("Dados do usuário sincronizados com o Firestore com sucesso!");
-                })
-                .catch(err => {
-                    console.error("Erro ao salvar usuário no Firestore:", err);
-                });
-        }
+        setDoc(userRef, userData, { merge: true })
+            .then(() => { console.log("Dados do usuário sincronizados com o Firestore com sucesso!"); })
+            .catch(err => { console.error("Erro ao salvar usuário no Firestore:", err); });
+    }
     
 
     loadElements(){
