@@ -444,6 +444,13 @@ export class WhatAppController{
 
                 e.preventDefault();
 
+                const btnSalvar = this.el.formPanelAddContact.querySelector('button[type="submit"]');
+                let textoOriginal = "";
+                if (btnSalvar) {
+                    textoOriginal = btnSalvar.innerText;
+                    btnSalvar.disabled = true;
+                    btnSalvar.innerText = "Carregando..."; // Ou adicione um spinner se preferir
+                }
                 let formData = new FormData(this.el.formPanelAddContact);
                 let contact = new User(formData.get('email'));
 
