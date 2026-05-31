@@ -67,5 +67,36 @@ export class User extends Model {
 
     }
 
+    static getContactsRef(id){
+        return collection(db, 'users', id, 'contacts');
+    }
+
+    getContacts(){                         //coloca a lista de contatos na tela e mantém atualizada
+        return new Promise((s, f) => {
+            
+            const contactsRef = User.getContactsRef(this.email);        //puxa pelo ID
+            
+            onSnapshot(contactsRef, (docSnapshot) => {
+                
+                let contacts = [];                              //criamos uma lista vazia
+
+                docSnapshot.forEach(doc => {                    //pega contato por contato como um varredor
+                    let data = doc.data();                      //pega os dados como e-mail, foto e nome
+                    data.id = doc.id;                           // guarda o ID b64
+                    contacts.push(data);                        //joga na tela
+                });
+
+                // Dispara o evento para atualizar a tela
+                this.trigger('contactschange', docSnapshot);          
+
+                // Devolve a lista preenchida
+                s(contacts);
+
+            }, (error) => {
+                f(error);
+            });
+
+        }); 
+    }
   
 }
