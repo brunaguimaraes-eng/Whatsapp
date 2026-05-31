@@ -23,7 +23,7 @@ export class WhatAppController{
     initAuth() {
         onAuthStateChanged(this._auth, (user) => { // Abre o observador do Firebase
             
-            if (user) { //Abre o bloco se o usuário existir
+            if (user) { // Abre o bloco se o usuário existir
 
                 console.log("Usuário autenticado e ativo:", user.displayName);
                                 
@@ -33,7 +33,10 @@ export class WhatAppController{
                     document.querySelector('title').innerHTML = data.name + ' - WhatsApp Clone';
 
                     if (this.el.inputNamePanelEditProfile) {
-                        this.el.inputNamePanelEditProfile.innerHTML = data.name;
+                        // Só atualiza o campo de texto se o usuário NÃO estiver digitando nele no momento
+                        if (document.activeElement !== this.el.inputNamePanelEditProfile) {
+                            this.el.inputNamePanelEditProfile.innerHTML = data.name;
+                        }
                     }
 
                     if (data.photo) {
@@ -52,18 +55,32 @@ export class WhatAppController{
                     }
                 });
 
-                this._user.name = user.displayName;
-                this._user.email = user.email;
-                this._user.photo = user.photoURL;
+                //Primeiro lemos o banco para checar se o usuário já existe
+                this._user.getById(user.email).then((docSnapshot) => {
 
-                this._user.save().then(() => {
+                    //Se o documento NÃO existir no banco (Primeiro login do usuário)
+                    if (!docSnapshot.exists()) {
+                        
+                        // Alimenta o Model com os dados padrões do Google pela primeira e única vez
+                        this._user.name = user.displayName;
+                        this._user.email = user.email;
+                        this._user.photo = user.photoURL;
+
+                        // Salva o novo registro no Firestore
+                        this._user.save().catch(err => {
+                            console.error("Erro ao salvar dados iniciais do usuário:", err);
+                        });
+                    }
+
+                    // Remove a tela verde de carregamento/login
                     const elementoLogin = document.getElementById('custom-login-container');
                     if (elementoLogin) elementoLogin.remove();
 
+                    // Abre o layout do WhatsApp Clone
                     if (this.el.app) this.el.app.show();
 
                 }).catch(err => {
-                    console.error("Erro ao salvar dados do usuário via Model:", err);
+                    console.error("Erro ao obter dados do usuário no Firestore:", err);
                 });
                 
             } else {
