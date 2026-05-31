@@ -285,7 +285,23 @@ export class WhatAppController{
 
             this.el.btnSavePanelEditProfile.on('click', e => {
 
-                console.log(this.el.inputNamePanelEditProfile.innerHTML);
+                // Desabilita o botão para evitar cliques duplos
+                this.el.btnSavePanelEditProfile.disabled = true;
+
+                //Atualiza o Model com o nome escrito na tela
+                this._user.name = this.el.inputNamePanelEditProfile.innerHTML;
+
+                //alva no Firebase
+                this._user.save().then(() => {
+                    
+                    // Quando terminar de salvar, reabilita o botão
+                    this.el.btnSavePanelEditProfile.disabled = false;
+                    console.log("Nome do usuário atualizado com sucesso no Firestore!");
+
+                }).catch(err => {
+                    this.el.btnSavePanelEditProfile.disabled = false;
+                    console.error("Erro ao atualizar o nome:", err);
+                });
 
             });
 
