@@ -58,5 +58,14 @@ export class User extends Model {
         return collection(db, 'users');
     }
 
+    addContact(contact){                 //adiciona usuários via e-mail(ID)
+
+        // conexão com o banco, coleção principal, ID, subcoleção, ID para base64
+        const docRef = doc(db, 'users', this.email, 'contacts', btoa(contact.email));
+        //Salvamos os dados em formato de texto
+        return setDoc(docRef, contact.toJSON());
+
+    }
+
   
 }

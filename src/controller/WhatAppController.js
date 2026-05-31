@@ -308,7 +308,7 @@ export class WhatAppController{
                 //Atualiza o Model com o nome escrito na tela
                 this._user.name = this.el.inputNamePanelEditProfile.innerHTML;
 
-                //alva no Firebase
+                //Salva no Firebase
                 this._user.save().then(() => {
                     
                     // Quando terminar de salvar, reabilita o botão
@@ -327,6 +327,30 @@ export class WhatAppController{
                 e.preventDefault();
 
                 let formData = new FormData(this.el.formPanelAddContact);
+                let contact = new User(formData.get('email'));
+
+                contact.on('datachange', data => {
+
+                    if (data.name) {
+                        
+                        //Só tenta adicionar se o usuário logado (this._user) já existir na memória
+                        if (this._user) {
+                            
+                            this._user.addContact(contact).then(() => {
+                                console.info('Contato foi adicionado!');
+                            }).catch(err => {
+                                console.error("Erro ao gravar o contato na subcoleção:", err);
+                            });
+
+                        } else {
+                            console.warn("Aguardando inicialização do usuário logado...");
+                        }
+
+                    } else {
+                        console.error('Usuário não foi encontrado.');
+                    }
+
+                });
 
             });
 
