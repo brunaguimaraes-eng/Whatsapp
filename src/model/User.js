@@ -1,5 +1,5 @@
 import { db } from '../util/Firebase';
-import { collection, doc, getDoc } from 'firebase/firestore'; 
+import { collection, doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { Model } from './Model';
 
 export class User extends Model {
@@ -24,17 +24,21 @@ export class User extends Model {
     getById(id) {
         return new Promise((s, f) => {
             
-            User.findByEmail(id).then(docSnapshot => {
+            // Criamos a referência exata do documento do usuário
+            const docRef = doc(User.getRef(), id);
+
+            //Ligamos a escuta em tempo real
+            onSnapshot(docRef, (docSnapshot) => {
                 
                 if (docSnapshot.exists()) {
-                    // Preenche o objeto com os dados vindos do banco
+                    // Preenche o objeto com os dados novos e dispara o trigger('datachange') automaticamente!
                     this.fromJSON(docSnapshot.data());
                 }
                 
-                s(docSnapshot); // Resolve a promessa com sucesso
+                s(docSnapshot); // Resolve a promessa na primeira leitura
 
-            }).catch(err => {
-                f(err); // Se der erro, rejeita a promessa
+            }, (error) => {
+                f(error); // Se der erro de permissão ou conexão, rejeita a promessa
             });
 
         });
@@ -54,10 +58,5 @@ export class User extends Model {
         return collection(db, 'users');
     }
 
-    // Como o e-mail virou o ID do documento, buscamos direto com o doc() e getDoc()
-    static findByEmail(email) {
-        const docRef = doc(User.getRef(), email);
-        return getDoc(docRef);
-    }
-
+  
 }

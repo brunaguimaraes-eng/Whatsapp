@@ -21,26 +21,29 @@ export class WhatAppController{
     }   
 
     initAuth() {
-        onAuthStateChanged(this._auth, (user) => {                         //escutador nativo do firebase, vigia o app o tempo todo
-            if (user) {
+        onAuthStateChanged(this._auth, (user) => { // Abre o observador do Firebase
+            
+            if (user) { //Abre o bloco se o usuário existir
 
                 console.log("Usuário autenticado e ativo:", user.displayName);
                                 
                 this._user = new User(user.email); 
 
                 this._user.on('datachange', data => {
-    
-                    // Atualiza dinamicamente o título da aba do navegador com o nome do usuário
                     document.querySelector('title').innerHTML = data.name + ' - WhatsApp Clone';
 
-                    if (data.photo) {
-                        // Injeta a foto do banco no painel lateral de Editar Perfil]
-                        let photo = this.el.imgPanelEditProfile;
-                        photo.src = data.photo;
-                        photo.show();
-                        this.el.imgDefaultPanelEditProfile.hide();
+                    if (this.el.inputNamePanelEditProfile) {
+                        this.el.inputNamePanelEditProfile.innerHTML = data.name;
+                    }
 
-                        //Injeta a foto também no avatar principal do topo esquerdo
+                    if (data.photo) {
+                        let photo = this.el.imgPanelEditProfile;
+                        if (photo) {
+                            photo.src = data.photo;
+                            photo.show();
+                        }
+                        if (this.el.imgDefaultPanelEditProfile) this.el.imgDefaultPanelEditProfile.hide();
+
                         let photo2 = this.el.myPhoto.querySelector('img');
                         if (photo2) {
                             photo2.src = data.photo;
@@ -49,30 +52,22 @@ export class WhatAppController{
                     }
                 });
 
-                
-                User.findByEmail(user.email).then(snapshot => {    //buscamos o e-mail no banco, criamos ou atualizamos e removemos a tela verde       
+                this._user.name = user.displayName;
+                this._user.email = user.email;
+                this._user.photo = user.photoURL;
 
-                    this.saveUserInFirestore(user);
-                    
+                this._user.save().then(() => {
                     const elementoLogin = document.getElementById('custom-login-container');
                     if (elementoLogin) elementoLogin.remove();
 
                     if (this.el.app) this.el.app.show();
-                    
-                    if (user.photoURL && this.el.myPhoto) {
-                        const imgTag = this.el.myPhoto.querySelector('img');
-                        if (imgTag) {
-                            imgTag.onerror = () => { imgTag.style.display = 'none'; };
-                            imgTag.onload = () => { imgTag.style.display = 'block'; };
-                            imgTag.src = user.photoURL;
-                        }
-                    }
 
                 }).catch(err => {
-                    console.error("Erro ao buscar e-mail no Firestore:", err);
+                    console.error("Erro ao salvar dados do usuário via Model:", err);
                 });
                 
             } else {
+                
                 console.log("Nenhum usuário logado. Bloqueando aplicação...");
                 
                 if (this.el.app) this.el.app.hide();
@@ -109,8 +104,10 @@ export class WhatAppController{
                     loginContainer.appendChild(botaoLogin);
                     document.body.appendChild(loginContainer);
                 }
+
             }
-        }); 
+
+        });
     }
 
     saveUserInFirestore(user) {

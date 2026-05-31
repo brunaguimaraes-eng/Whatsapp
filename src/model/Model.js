@@ -2,7 +2,7 @@ import { ClassEvent } from "../util/ClassEvent";
 
 export class Model extends ClassEvent {
 
-    constructor() {               //falar com sérgio nao entendi o conceito de classe mãe.
+    constructor() {              
         super();
         this._data = {};
     }
