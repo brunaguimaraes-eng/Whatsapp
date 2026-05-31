@@ -150,7 +150,7 @@ export class WhatAppController{
         //Ouvimos o evento disparado pelo getContacts() quando o banco muda
         this._user.on('contactschange', docsSnapshot => {
 
-            // Limpa a barra lateral para não duplicar os contatos na tela
+            //Limpa a barra lateral para não duplicar os contatos na tela
             this.el.contactsMessagesList.innerHTML = '';
 
             // Usamos o .docs para varrer os documentos retornados pelo snapshot do Firebase
@@ -212,25 +212,46 @@ export class WhatAppController{
 
                 // Adiciona o clique em cada item renderizado para abrir a conversa
                 div.on('click', e => {
+                    // Altera o texto do cabeçalho com o nome e status do contato ativo
+                    this.el.activeName.innerHTML = contact.name;
+                    this.el.activeStatus.innerHTML = contact.status || 'Online';
+
+                    // Se o contato tiver foto, atualiza a foto do cabeçalho do chat
+                    if (contact.photo) {
+                        let activeImg = this.el.activePhoto;
+                        if (activeImg) {
+                            activeImg.src = contact.photo;
+                            activeImg.show();
+                        }
+                    }
+
+                    // Abre o painel principal do chat
                     this.el.home.hide();
                     this.el.main.css({ display: 'flex' });
                 });
 
-                // Injeta a foto do contato se ela existir no banco
+                // Injeta a foto do contato na lista lateral se ela existir no banco
                 if (contact.photo) {
-                    let img = div.querySelector('.photo');
-                    img.src = contact.photo;
-                    img.show();
+                    let img = div.querySelector('.photo'); 
+                    if (img) {
+                        img.src = contact.photo;
+                        img.show(); // Mostra a foto real
+                    }
+                    
+                    let avatarPadrao = div.querySelector('._3ZW2E');
+                    if (avatarPadrao) {
+                        avatarPadrao.hide(); // Esconde o bonequinho cinza padrão
+                    }
                 }
 
-                // Insere visualmente a div do contato dentro da barra lateral esquerda
+                // Insere a div do contato dentro da lista lateral esquerda
                 this.el.contactsMessagesList.appendChild(div);
 
             });
 
         });
 
-        //Ativa a escuta inicial chamando a nossa Promise do User.js
+        // Ativa a escuta inicial chamando a nossa Promise do User.js
         this._user.getContacts().catch(err => {
             console.error("Erro na escuta inicial de contatos:", err);
         });
