@@ -5,6 +5,8 @@ import { DocumentPreviewController } from './DocumentPreviewController.js';
 import { db, auth, storage, initAuth as loginFirebase, logout, doc, setDoc } from './../util/Firebase.js';
 import { onAuthStateChanged } from 'firebase/auth';
 import { User } from '../model/User.js';
+import { Chat } from '../model/Chat.js';
+import { getDoc } from 'firebase/firestore';
 
 export class WhatAppController{
 
@@ -449,18 +451,48 @@ export class WhatAppController{
 
                     if (data.name) {
                         
-                        //Só tenta adicionar se o usuário logado (this._user) já existir na memória
-                        if (this._user) {
-                            
-                            this._user.addContact(contact).then(() => {
-                                console.info('Contato foi adicionado!');
-                            }).catch(err => {
-                                console.error("Erro ao gravar o contato na subcoleção:", err);
-                            });
+                                               
+                      //Organiza os e-mails em ordem alfabética para o ID ser idêntico para os dois usuários
+                        let emails = [this._user.email, contact.email].sort();
 
-                        } else {
-                            console.warn("Aguardando inicialização do usuário logado...");
-                        }
+                        // Cria a string Base64 que serve como o ID exclusivo da conversa
+                        let chatId = btoa(emails.join('/'));
+
+                        //Monta a referência do documento na coleção 'chats'
+                        const chatRef = doc(Chat.getRef(), chatId);
+
+                        //Busca no Firestore se essa conversa já existe na nuvem
+                        getDoc(chatRef).then(chatSnapshot => {
+
+                            if (chatSnapshot.exists()) {
+                                
+                                // Se o chat já existe, vincula o ID ao contato e salva o amigo
+                                contact.chatId = chatId;
+                                this.gravarContatoNoUsuario(contact);
+
+                            } else {
+                                
+                                // Se for uma conversa inédita, monta a estrutura inicial
+                                let chatData = {
+                                    users: {},
+                                    timeStamp: new Date()
+                                };
+
+                                // Define quais os dois usuários que pertencem a esse chat
+                                chatData.users[btoa(this._user.email)] = true;
+                                chatData.users[btoa(contact.email)] = true;
+
+                                // Salva o novo chat vazio no banco de dados
+                                setDoc(chatRef, chatData).then(() => {
+                                    
+                                    contact.chatId = chatId;
+                                    this.gravarContatoNoUsuario(contact);
+
+                                }).catch(err => console.error("Erro ao criar documento do chat:", err));
+
+                            }
+
+                        }).catch(err => console.error("Erro ao buscar dados do chat:", err));
 
                     } else {
                         console.error('Usuário não foi encontrado.');
@@ -792,6 +824,30 @@ export class WhatAppController{
         this.el.panelEditProfile.hide();            
     }
 
+    gravarContatoNoUsuario(contact) {
+        if (this._user) {
+
+            // Vincula o ID do chat no seu próprio usuário na memória
+            this._user.chatId = contact.chatId;
+
+            //Grava você na lista de contatos do seu amigo (Reciprocidade)
+            contact.addContact(this._user).catch(err => {
+                console.error("Erro na reciprocidade (salvar você no amigo):", err);
+            });
+
+            //Grava o amigo na sua lista de contatos
+            this._user.addContact(contact).then(() => {
+                
+                // Fecha o painel lateral e limpa a tela
+                this.el.btnClosePanelAddContact.click();
+                console.info('Contato foi adicionado!');
+
+            }).catch(err => {
+                console.error("Erro ao gravar o contato na sua subcoleção:", err);
+            });
+            
+        }
+    }
 
 
 
