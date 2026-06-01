@@ -265,27 +265,35 @@ export class WhatAppController{
 
         this._messagesFn = onSnapshot(q, (snapShot) => {
 
-            this.el.panelMessagesContainer.innerHTML = '';          //limpa novamente para nao duplicar balões
+            //CALCULA SE DEVE FAZER SCROLL ANTES DE INJETAR AS MENSAGENS NOVAS
+            let scrollTop = this.el.panelMessagesContainer.scrollTop;
+            let scrollTopMax = (this.el.panelMessagesContainer.scrollHeight - this.el.panelMessagesContainer.offsetHeight);
+            
+            // Se o usuário já estava no fundo da tela (ou perto), ativa o autoScroll
+            let autoScroll = (scrollTop >= scrollTopMax - 10); 
 
             snapShot.forEach((doc) => { 
 
-                let data = doc.data();               //extrai o conteúdo real da mensageml texto, hora, etc e guarda na variável data
+                let data = doc.data();
                 data.id = doc.id;
 
-                if(!this.el.panelMessagesContainer.querySelector('#_' + data.id)){        //valida se o ID que chegou é de uma mensagem nova ou de uma que já existe
+                if(!this.el.panelMessagesContainer.querySelector('#_' + data.id)){
 
-                    let message = new Message();         //aqui e o JSON, usamos o model message, com aquele monte de HTML, pra definir como a mensagem vai aparecer 
-
+                    let message = new Message();
                     message.fromJSON(data);
 
                     let me = (data.from === this._user.email);
-                    let view = message.getViewElement(me);           //aqui o método identifica se o balão da mensagem é meu ou do amigo
+                    let view = message.getViewElement(me);
 
-                    this.el.panelMessagesContainer.appendChild(view);  //mostra a mensagem correta na tela
-
+                    this.el.panelMessagesContainer.appendChild(view);
                 }           
-            })
-        })
+            });
+
+            if (autoScroll) {
+                this.el.panelMessagesContainer.scrollTop = this.el.panelMessagesContainer.scrollHeight;
+            }
+
+        });
 
         this._contactActive = contact;
 
