@@ -6,6 +6,7 @@ import { db, auth, storage, initAuth as loginFirebase, logout, doc, setDoc } fro
 import { onAuthStateChanged } from 'firebase/auth';
 import { User } from '../model/User.js';
 import { Chat } from '../model/Chat.js';
+import { Message } from '../model/Message.js';
 import { getDoc } from 'firebase/firestore';
 
 export class WhatAppController{
@@ -214,23 +215,10 @@ export class WhatAppController{
 
                 // Adiciona o clique em cada item renderizado para abrir a conversa
                 div.on('click', e => {
-                    // Altera o texto do cabeçalho com o nome e status do contato ativo
-                    this.el.activeName.innerHTML = contact.name;
-                    this.el.activeStatus.innerHTML = contact.status || 'Online';
 
-                    // Se o contato tiver foto, atualiza a foto do cabeçalho do chat
-                    if (contact.photo) {
-                        let activeImg = this.el.activePhoto;
-                        if (activeImg) {
-                            activeImg.src = contact.photo;
-                            activeImg.show();
-                        }
-                    }
+                 this.setActiveChat(contact);
 
-                    // Abre o painel principal do chat
-                    this.el.home.hide();
-                    this.el.main.css({ display: 'flex' });
-                });
+                });  
 
                 // Injeta a foto do contato na lista lateral se ela existir no banco
                 if (contact.photo) {
@@ -259,6 +247,31 @@ export class WhatAppController{
         });
 
     }
+
+    setActiveChat(contact){
+
+        this._contactActive = contact;
+
+        console.log('chatId', contact.chatId);
+
+        // Atualiza os dados do cabeçalho com o contato ativo
+        this.el.activeName.innerHTML = contact.name;
+        this.el.activeStatus.innerHTML = contact.status || 'Online';
+
+        // Se o contato tiver foto, atualiza a foto do cabeçalho
+        if (contact.photo) {
+            let activeImg = this.el.activePhoto;
+            if (activeImg) {
+                activeImg.src = contact.photo;
+                activeImg.show();
+            }
+        }
+
+        // Exibe a tela de conversa e oculta a tela padrão (home)
+        this.el.home.hide();
+        this.el.main.css({ display: 'flex' });
+
+    }    
     
 
     loadElements(){
@@ -449,7 +462,7 @@ export class WhatAppController{
                 if (btnSalvar) {
                     textoOriginal = btnSalvar.innerText;
                     btnSalvar.disabled = true;
-                    btnSalvar.innerText = "Carregando..."; // Ou adicione um spinner se preferir
+                    btnSalvar.innerText = "Carregando...";
                 }
                 let formData = new FormData(this.el.formPanelAddContact);
                 let contact = new User(formData.get('email'));
@@ -755,8 +768,22 @@ export class WhatAppController{
             });
 
             this.el.btnSend.on('click', e =>{
-                console.log( this.el.inputText.innerHTML);
-            })
+                
+                
+                Message.send(
+                    this._contactActive.chatId,   // 1. chatId
+                    this._user.email,             // 2. from (O seu e-mail)
+                    'text',                       // 3. type (Por enquanto, texto puro)
+                    this.el.inputText.innerHTML  // 4. content (O que foi digitado)
+                );
+
+                // Limpa o campo de texto após enviar
+                this.el.inputText.innerHTML = '';
+                
+                // Fecha o painel de emojis caso ele estivesse aberto
+                this.el.panelEmojis.removeClass('open');
+
+            });
 
             this.el.btnEmojis.on('click', e =>{
                 this.el.panelEmojis.toggleClass('open');

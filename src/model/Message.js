@@ -1,5 +1,6 @@
 import { Firebase } from "../util/Firebase";
 import { Model } from "./Model";
+import { db } from "./../util/Firebase.js";
 import { collection, addDoc } from "firebase/firestore";
 
 export class Message extends Model {
@@ -251,22 +252,31 @@ export class Message extends Model {
         return collection(Firebase.db, 'chats', chatEmail, 'messages');
     }
 
-    static send(chatEmail, fromEmail, type, content) {
-        return new Promise((resolve, reject) => {
-            addDoc(Message.getRef(chatEmail), {
-                from: fromEmail,
-                type: type,
-                content: content,
-                timestamp: new Date()
-            })
-            .then(docRef => {
-                resolve(docRef);
-            })
-            .catch(err => {
-                console.error("Erro ao enviar mensagem:", err);
-                reject(err);
-            });
+    static send(chatId, content) {
+        
+        return addDoc(Message.getRef(chatId), {
+            content: content,
+            timeStamp: new Date(),
+            status: 'wait'
         });
+
+    }
+
+    static getRef(chatId){
+        // Equivalente ao: collection('chats').doc(chatId).collection('messages')
+        return collection(db, 'chats', chatId, 'messages');
+    }
+
+    static send(chatId, from, type, content) {
+        
+        return addDoc(Message.getRef(chatId), {
+            from: from,
+            type: type,
+            content: content,
+            timeStamp: new Date(),
+            status: 'wait'
+        });
+
     }
 
 }
