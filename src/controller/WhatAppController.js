@@ -8,6 +8,7 @@ import { User } from '../model/User.js';
 import { Chat } from '../model/Chat.js';
 import { Message } from '../model/Message.js';
 import { getDoc } from 'firebase/firestore';
+import { query, orderBy, onSnapshot } from "firebase/firestore";
 
 export class WhatAppController{
 
@@ -20,6 +21,7 @@ export class WhatAppController{
         this.loadElements();
         this.initEvents();
         this.initAuth();
+        this._messagesFn = null;
         
     }   
 
@@ -249,6 +251,41 @@ export class WhatAppController{
     }
 
     setActiveChat(contact){
+
+        if(typeof this._messagesFn === 'function'){          //limpa o listener anterior
+            this._messagesFn();
+        }
+
+        this.el.panelMessagesContainer.innerHTML = '';        //limpa o container de mensagens para receber as novas
+
+        const q = query(                                    //ordenação de menssagens, mostra da mais nova pra mais antiga
+            Message.getRef(contact.chatId),
+            orderBy('timeStamp', 'asc')
+        );
+
+        this._messagesFn = onSnapshot(q, (snapShot) => {
+
+            this.el.panelMessagesContainer.innerHTML = '';          //limpa novamente para nao duplicar balões
+
+            snapShot.forEach((doc) => { 
+
+                let data = doc.data();               //extrai o conteúdo real da mensageml texto, hora, etc e guarda na variável data
+                data.id = doc.id;
+
+                if(!this.el.panelMessagesContainer.querySelector('#_' + data.id)){        //valida se o ID que chegou é de uma mensagem nova ou de uma que já existe
+
+                    let message = new Message();         //aqui e o JSON, usamos o model message, com aquele monte de HTML, pra definir como a mensagem vai aparecer 
+
+                    message.fromJSON(data);
+
+                    let me = (data.from === this._user.email);
+                    let view = message.getViewElement(me);           //aqui o método identifica se o balão da mensagem é meu ou do amigo
+
+                    this.el.panelMessagesContainer.appendChild(view);  //mostra a mensagem correta na tela
+
+                }           
+            })
+        })
 
         this._contactActive = contact;
 

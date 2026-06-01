@@ -28,4 +28,20 @@ export class Format {
 
     }
 
+    static dateToTime(date, locale = 'pt-BR'){
+
+        let localeCorrect = locale.replace('_', '-');      //substitui o _ por -, o js espera pt-BR
+
+        return date.toLocaleTimeString(localeCorrect, {
+            hour: '2-digit',
+            minute:'2-digit'
+        });
+
+    }
+
+    static timeStampToTime(timeStamp){
+
+        return (timeStamp && typeof timeStamp.toDate === 'function') ? Format.dateToTime(timeStamp.toDate()) : '';
+    }
+
 }

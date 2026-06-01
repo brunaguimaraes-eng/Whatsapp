@@ -2,6 +2,7 @@ import { Firebase } from "../util/Firebase";
 import { Model } from "./Model";
 import { db } from "./../util/Firebase.js";
 import { collection, addDoc } from "firebase/firestore";
+import { Format } from "./../util/Format.js";
 
 export class Message extends Model {
 
@@ -21,6 +22,9 @@ export class Message extends Model {
     get status() { return this._data.status; }
     set status(value) { this._data.status = value; }
 
+    get id() { return this._data.id; }
+    set id(value) { this._data.id = value; }
+
 
     getViewElement(me = true) {
 
@@ -33,7 +37,7 @@ export class Message extends Model {
 
             case 'contact':
                 div.innerHTML = 
-                `<div class="font-style _3DFk6 tail">
+                `<div class="font-style _3DFk6 tail" id="_${this.id}">
                     <span class="tail-container"></span>
                     <span class="tail-container highlight"></span>
                     <div class="Tkt2p">
@@ -42,7 +46,7 @@ export class Message extends Model {
                         </div>
                         <div class="_2f-RV">
                             <div class="_1DZAH">
-                                <span class="msg-time">11:33</span>
+                                <span class="msg-time">${Format.timeStampToTime(this.timeStamp)}</span>
                             </div>
                         </div>
                     </div>
@@ -53,7 +57,7 @@ export class Message extends Model {
 
             case 'image':
                 div.innerHTML = `    
-                <div class="_3_7SH _3qMSo">
+                <div class="_3_7SH _3qMSo" id="_${this.id}">
                     <div class="KYpDv">
                         <div>
                             <div class="_3v3PK" style="width: 330px; height: 330px;">
@@ -109,7 +113,7 @@ export class Message extends Model {
 
             case 'document':
                 div.innerHTML = 
-                `<div class="_3_7SH _1ZPgd">
+                `<div class="_3_7SH _1ZPgd" id="_${this.id}">
                     <div class="_1fnMt _2CORf">
                         <a class="_1vKRe" href="#">
                             <div class="_2jTyA" style="background-image: url()"></div>
@@ -159,7 +163,7 @@ export class Message extends Model {
 
             case 'audio':
                 div.innerHTML = `                
-                <div class="font-style _3DFk6 tail">
+                <div class="font-style _3DFk6 tail" id="_${this.id}">
                     <span class="tail-container"></span>
                     <span class="tail-container highlight"></span>
                     <div class="Tkt2p">
@@ -200,7 +204,7 @@ export class Message extends Model {
             // Se não for nenhum dos tipos acima, cai no default (Texto Puro)
             default:
                 div.innerHTML = `                
-                <div class="font-style _3DFk6 tail">
+                <div class="font-style _3DFk6 tail" id="_${this.id}">
                     <span class="tail-container"></span>
                     <span class="tail-container highlight"></span>
                     <div class="Tkt2p">
@@ -209,7 +213,7 @@ export class Message extends Model {
                         </div>
                         <div class="_2f-RV">
                             <div class="_1DZAH" role="button">
-                                <span class="msg-time">11:52</span>
+                                <span class="msg-time">${Format.timeStampToTime(this.timeStamp)}</span>
                                 <div class="message-status">
                                     <span data-icon="msg-dblcheck-ack" style="display:none">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
