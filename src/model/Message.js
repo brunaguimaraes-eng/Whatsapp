@@ -1,7 +1,7 @@
 import { Firebase } from "../util/Firebase";
 import { Model } from "./Model";
 import { db } from "./../util/Firebase.js";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 import { Format } from "./../util/Format.js";
 
 export class Message extends Model {
@@ -25,14 +25,12 @@ export class Message extends Model {
     get id() { return this._data.id; }
     set id(value) { this._data.id = value; }
 
-
+    //GERA O BALÃO DE MENSAGEM NA TELA
     getViewElement(me = true) {
 
-        // Cria a caixinha principal do balão da mensagem
         let div = document.createElement('div');
         div.className = 'message';
 
-        // O switch checa o tipo de mensagem para saber o que desenhar dentro da div
         switch (this.type) {
 
             case 'contact':
@@ -45,14 +43,12 @@ export class Message extends Model {
                             <span dir="ltr" class="selectable-text invisible-space message-text">${this.content}</span>
                         </div>
                         <div class="_2f-RV">
-                            <div class="_1DZAH">
-                                <span class="msg-time">${Format.timeStampToTime(this.timeStamp)}</span>
+                            <div class="_1DZAH" role="button">
+                                <span class="message-time">${Format.timeStampToTime(this.timeStamp)}</span>
                             </div>
                         </div>
                     </div>
                 </div>`;
-            
-
             break;
 
             case 'image':
@@ -87,14 +83,7 @@ export class Message extends Model {
                             </div>
                             <div class="_2TvOE">
                                 <div class="_1DZAH text-white" role="button">
-                                    <span class="message-time">17:22</span>
-                                    <div class="message-status">
-                                        <span data-icon="msg-check-light">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
-                                                <path fill="#FFF" d="M10.91 3.316l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
-                                            </svg>
-                                        </span>
-                                    </div>
+                                    <span class="message-time">${Format.timeStampToTime(this.timeStamp)}</span>
                                 </div>
                             </div>
                         </div>
@@ -107,8 +96,7 @@ export class Message extends Model {
                             </svg>
                         </span>
                     </div>
-                </div>`
-                
+                </div>`;
             break;
 
             case 'document':
@@ -128,7 +116,6 @@ export class Message extends Model {
                                     <span data-icon="audio-download" class="message-file-download">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="34" height="34">
                                             <path fill="#263238" fill-opacity=".5" d="M17 2c8.3 0 15 6.7 15 15s-6.7 15-15 15S2 25.3 2 17 8.7 2 17 2m0-1C8.2 1 1 8.2 1 17s7.2 16 16 16 16-7.2 16-16S25.8 1 17 1z"></path>
-                                            <path fill="#263238" fill-opacity=".5" d="M22.4 17.5h-3.2v-6.8c0-.4-.3-.7-.7-.7h-3.2c-.4 0-.7.3-.7.7v6.8h-3.2c-.6 0-.8.4-.4.8l5 5.3c.5.7 1 .5 1.5 0l5-5.3c.7-.5.5-.8-.1-.8z"></path>
                                         </svg>
                                     </span>
                                     <div class="_3SUnz message-file-load" style="display:none">
@@ -146,19 +133,11 @@ export class Message extends Model {
                         </div>
                         <div class="_3Lj_s">
                             <div class="_1DZAH" role="button">
-                                <span class="message-time">18:56</span>
-                                <div class="message-status">
-                                    <span data-icon="msg-time">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
-                                            <path fill="#859479" d="M9.75 7.713H8.244V5.359a.5.5 0 0 0-.5-.5H7.65a.5.5 0 0 0-.5.5v2.947a.5.5 0 0 0 .5.5h.094l.003-.001.003.002h2a.5.5 0 0 0 .5-.5v-.094a.5.5 0 0 0-.5-.5zm0-5.263h-3.5c-1.82 0-3.3 1.48-3.3 3.3v3.5c0 1.82 1.48 3.3 3.3 3.3h3.5c1.82 0 3.3-1.48 3.3-3.3v-3.5c0-1.82-1.48-3.3-3.3-3.3zm2 6.8a2 2 0 0 1-2 2h-3.5a2 2 0 0 1-2-2v-3.5a2 2 0 0 1 2-2h3.5a2 2 0 0 1 2 2v3.5z"></path>
-                                        </svg>
-                                    </span>
-                                </div>
+                                <span class="message-time">${Format.timeStampToTime(this.timeStamp)}</span>                                
                             </div>
                         </div>
                     </div>
-                </div>`;                               
-                
+                </div>`;
             break;
 
             case 'audio':
@@ -172,36 +151,13 @@ export class Message extends Model {
                         </div>
                         <div class="_2f-RV">
                             <div class="_1DZAH" role="button">
-                                <span class="msg-time">11:52</span>
-                                <div class="message-status">
-                                    <span data-icon="msg-dblcheck-ack" style="display:none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
-                                            <path fill="#4FC3F7" d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
-                                        </svg>
-                                    </span>
-                                    <span data-icon="msg-dblcheck">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
-                                            <path fill="#92A58C" d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
-                                        </svg>
-                                    </span>
-                                    <span data-icon="msg-check" style="display:none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
-                                            <path fill="#92A58C" d="M10.91 3.316l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
-                                        </svg>
-                                    </span>
-                                    <span data-icon="msg-time">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
-                                            <path fill="#859479" d="M9.75 7.713H8.244V5.359a.5.5 0 0 0-.5-.5H7.65a.5.5 0 0 0-.5.5v2.947a.5.5 0 0 0 .5.5h.094l.003-.001.003.002h2a.5.5 0 0 0 .5-.5v-.094a.5.5 0 0 0-.5-.5zm0-5.263h-3.5c-1.82 0-3.3 1.48-3.3 3.3v3.5c0 1.82 1.48 3.3 3.3 3.3h3.5c1.82 0 3.3-1.48 3.3-3.3v-3.5c0-1.82-1.48-3.3-3.3-3.3zm2 6.8a2 2 0 0 1-2 2h-3.5a2 2 0 0 1-2-2v-3.5a2 2 0 0 1 2-2h3.5a2 2 0 0 1 2 2v3.5z"></path>
-                                        </svg>
-                                    </span>
-                                </div>
+                                <span class="message-time">${Format.timeStampToTime(this.timeStamp)}</span>
                             </div>
                         </div>
                     </div>
                 </div>`;
             break;
 
-            // Se não for nenhum dos tipos acima, cai no default (Texto Puro)
             default:
                 div.innerHTML = `                
                 <div class="font-style _3DFk6 tail" id="_${this.id}">
@@ -213,29 +169,7 @@ export class Message extends Model {
                         </div>
                         <div class="_2f-RV">
                             <div class="_1DZAH" role="button">
-                                <span class="msg-time">${Format.timeStampToTime(this.timeStamp)}</span>
-                                <div class="message-status">
-                                    <span data-icon="msg-dblcheck-ack" style="display:none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
-                                            <path fill="#4FC3F7" d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
-                                        </svg>
-                                    </span>
-                                    <span data-icon="msg-dblcheck">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
-                                            <path fill="#92A58C" d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
-                                        </svg>
-                                    </span>
-                                    <span data-icon="msg-check" style="display:none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
-                                            <path fill="#92A58C" d="M10.91 3.316l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
-                                        </svg>
-                                    </span>
-                                    <span data-icon="msg-time">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
-                                            <path fill="#859479" d="M9.75 7.713H8.244V5.359a.5.5 0 0 0-.5-.5H7.65a.5.5 0 0 0-.5.5v2.947a.5.5 0 0 0 .5.5h.094l.003-.001.003.002h2a.5.5 0 0 0 .5-.5v-.094a.5.5 0 0 0-.5-.5zm0-5.263h-3.5c-1.82 0-3.3 1.48-3.3 3.3v3.5c0 1.82 1.48 3.3 3.3 3.3h3.5c1.82 0 3.3-1.48 3.3-3.3v-3.5c0-1.82-1.48-3.3-3.3-3.3zm2 6.8a2 2 0 0 1-2 2h-3.5a2 2 0 0 1-2-2v-3.5a2 2 0 0 1 2-2h3.5a2 2 0 0 1 2 2v3.5z"></path>
-                                        </svg>
-                                    </span>
-                                </div>
+                                <span class="message-time">${Format.timeStampToTime(this.timeStamp)}</span>
                             </div>
                         </div>
                     </div>
@@ -245,42 +179,90 @@ export class Message extends Model {
 
         let className = (me) ? 'message-out' : 'message-in';
 
+        // Injeta o status ao lado do horário se a mensagem for minha
+        if (me) {
+            let timeEl = div.querySelector('.message-time');
+            if (timeEl) {
+                timeEl.parentElement.appendChild(this.getStatusViewElement());
+            }
+        }
+
         div.firstElementChild.classList.add(className);
-
-        // Devolve o balão montado com o HTML correto para o controlador injetar na tela
         return div;
-
     }
 
-    static getRef(chatEmail) {
-        return collection(Firebase.db, 'chats', chatEmail, 'messages');
+    // GERA DINAMICAMENTE O ÍCONE DO STATUS (Relógio, Check, etc.)
+    getStatusViewElement() {
+
+        let div = document.createElement('div');
+        div.className = 'message-status';
+
+        switch (this.status) {
+
+            case 'wait':
+                div.innerHTML = `
+                    <span data-icon="msg-time">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
+                            <path fill="#859479" d="M9.75 7.713H8.244V5.359a.5.5 0 0 0-.5-.5H7.65a.5.5 0 0 0-.5.5v2.947a.5.5 0 0 0 .5.5h.094l.003-.001.003.002h2a.5.5 0 0 0 .5-.5v-.094a.5.5 0 0 0-.5-.5zm0-5.263h-3.5c-1.82 0-3.3 1.48-3.3 3.3v3.5c0 1.82 1.48 3.3 3.3 3.3h3.5c1.82 0 3.3-1.48 3.3-3.3v-3.5c0-1.82-1.48-3.3-3.3-3.3zm2 6.8a2 2 0 0 1-2 2h-3.5a2 2 0 0 1-2-2v-3.5a2 2 0 0 1 2-2h3.5a2 2 0 0 1 2 2v3.5z"></path>
+                        </svg>
+                    </span>`;
+            break;
+
+            case 'sent':
+                div.innerHTML = `
+                    <span data-icon="msg-check-light">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
+                            <path fill="#92A58C" d="M10.91 3.316l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
+                        </svg>
+                    </span>`;
+            break;
+
+            case 'received':
+                div.innerHTML = `
+                    <span data-icon="msg-dblcheck">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
+                            <path fill="#92A58C" d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
+                        </svg>
+                    </span>`;
+            break;
+
+            case 'read':
+                div.innerHTML = `
+                    <span data-icon="msg-dblcheck-ack">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15" width="16" height="15">
+                            <path fill="#4FC3F7" d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
+                        </svg>
+                    </span>`;
+            break;
+        }
+
+        return div;
     }
-
-    static send(chatId, content) {
-        
-        return addDoc(Message.getRef(chatId), {
-            content: content,
-            timeStamp: new Date(),
-            status: 'wait'
-        });
-
-    }
-
+    
+    // COMUNICAÇÃO DO BANCO DE DADOS 
     static getRef(chatId){
-        // Equivalente ao: collection('chats').doc(chatId).collection('messages')
         return collection(db, 'chats', chatId, 'messages');
     }
 
     static send(chatId, from, type, content) {
-        
-        return addDoc(Message.getRef(chatId), {
-            from: from,
-            type: type,
-            content: content,
-            timeStamp: new Date(),
-            status: 'wait'
+        return new Promise((s, f) => {
+            const messagesRef = Message.getRef(chatId);
+
+            addDoc(messagesRef, {
+                from: from,
+                type: type,
+                content: content,
+                timeStamp: new Date(),
+                status: 'wait'
+            }).then((result) => {
+                const docRef = doc(messagesRef, result.id);
+
+                setDoc(docRef, {
+                    status: 'sent'
+                }, { merge: true }).then(() => {
+                    s(); 
+                }).catch(err => f(err));
+            }).catch(err => f(err));
         });
-
     }
-
 }

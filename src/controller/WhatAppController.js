@@ -277,16 +277,42 @@ export class WhatAppController{
                 let data = doc.data();
                 data.id = doc.id;
 
-                if(!this.el.panelMessagesContainer.querySelector('#_' + data.id)){
+                let message = new Message();
+                message.fromJSON(data);
 
-                    let message = new Message();
-                    message.fromJSON(data);
+                if(!this.el.panelMessagesContainer.querySelector('#_' + data.id)){      
 
                     let me = (data.from === this._user.email);
+
+                    if (!me && data.status !== 'read') {                            
+                        
+                        // Criamos a referência do documento atual
+                        setDoc(doc.ref, {
+                            status: 'read'
+                        }, { merge: true }).catch(err => {
+                            console.error("Erro ao atualizar status para lido:", err);
+                        });
+
+                    }
+
+
                     let view = message.getViewElement(me);
 
                     this.el.panelMessagesContainer.appendChild(view);
-                }           
+                } else {
+                    
+                    let msgEl = this.el.panelMessagesContainer.querySelector('#_' + data.id);
+
+                    if(msgEl){
+
+                        let statusEl = msgEl.querySelector('.message-status');
+                        if (statusEl){
+                            statusEl.innerHTML = message.getStatusViewElement().innerHTML;
+                        }
+
+                    }
+
+                }         
             });
 
             if (autoScroll) {
@@ -296,8 +322,6 @@ export class WhatAppController{
         });
 
         this._contactActive = contact;
-
-        console.log('chatId', contact.chatId);
 
         // Atualiza os dados do cabeçalho com o contato ativo
         this.el.activeName.innerHTML = contact.name;
