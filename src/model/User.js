@@ -1,5 +1,5 @@
 import { db } from '../util/Firebase';
-import { collection, doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { collection, doc, setDoc, onSnapshot, query, where } from "firebase/firestore";
 import { Model } from './Model';
 
 export class User extends Model {
@@ -74,19 +74,27 @@ export class User extends Model {
         return collection(db, 'users', id, 'contacts');
     }
 
-    getContacts(){                         //coloca a lista de contatos na tela e mantém atualizada
+    getContacts(filter = ''){                         // coloca a lista de contatos na tela e mantém atualizada com filtros
         return new Promise((s, f) => {
             
-            const contactsRef = User.getContactsRef(this.email);        //puxa pelo ID
+            // puxa pelo ID
+            const contactsRef = User.getContactsRef(this.email);        
             
-            onSnapshot(contactsRef, (docSnapshot) => {
+            // Cria a Query filtrando por nome (se 'filter' estiver vazio, traz tudo)
+            const q = query(
+                contactsRef, 
+                where('name', '>=', filter)
+            );
+            
+            // Agora passamos a Query 'q' no lugar de 'contactsRef'
+            onSnapshot(q, (docSnapshot) => {
                 
-                let contacts = [];                              //criamos uma lista vazia
+                let contacts = [];                               // criamos uma lista vazia
 
-                docSnapshot.forEach(doc => {                    //pega contato por contato como um varredor
-                    let data = doc.data();                      //pega os dados como e-mail, foto e nome
+                docSnapshot.forEach(doc => {                    // pega contato por contato como um varredor
+                    let data = doc.data();                      // pega os dados como e-mail, foto e nome
                     data.id = doc.id;                           // guarda o ID b64
-                    contacts.push(data);                        //joga na tela
+                    contacts.push(data);                        // joga na lista
                 });
 
                 // Dispara o evento para atualizar a tela
