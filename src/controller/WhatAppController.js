@@ -677,12 +677,41 @@ export class WhatAppController{
                 this.el.containerSendPicture.hide();
 
             })
+           
 
-            this.el.btnSendPicture.on('click', e => {
+            this.el.btnSendPicture.addEventListener('click', e => {
 
-                console.log(this.el.pictureCamera.src)
+                //Verifica se o texto começa com data, (.+) captura tudo que estiver entre : eo ; nesse caso será image/png ou jpeg
+                // /base64 localiza o texto intermediário
+                // (.*) todo o restante do testo até o final
+                let regex = /^data:(.+);base64,(.*)$/;                    
+                let result = this.el.pictureCamera.src.match(regex);
+                let mimeType = result[1];
+                let ext = mimeType.split('/')[1];
+                let filename = `camera${Date.now()}.${ext}`;
 
-            })
+                //Transforma a string Base64 em um arquivo real binário
+                fetch(this.el.pictureCamera.src)
+                .then(res => { return res.arrayBuffer(); })
+                .then(buffer => { return new File([buffer], filename, { type: mimeType }); })
+                .then(file => {
+
+                   
+                    Message.sendImage(this._contactActive.chatId, this._user.email, file).then(() => {
+                        
+                        this.el.btnSendPicture.disabled = false;
+
+                    }).catch(err => {
+                        console.error(err);
+                        this.el.btnSendPicture.disabled = false;
+                    });
+
+                });
+
+                
+
+            });
+           
 
             this.el.btnAttachDocument.on('click', e => {
                 
