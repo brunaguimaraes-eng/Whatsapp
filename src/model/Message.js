@@ -3,6 +3,8 @@ import { Model } from "./Model";
 import { db } from "./../util/Firebase.js";
 import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 import { Format } from "./../util/Format.js";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storage } from "./../util/Firebase.js";
 
 export class Message extends Model {
 
@@ -57,8 +59,7 @@ export class Message extends Model {
                     <div class="KYpDv">
                         <div>
                             <div class="_3v3PK" style="width: 330px; height: 330px;">
-                                <div class="_34Olu">
-                                    <div class="_2BzIU">
+                                <div class="_34Olu" style="display:none;"> <div class="_2BzIU">
                                         <div class="_2X3l6">
                                             <svg class="_1UDDE" width="50" height="50" viewBox="0 0 43 43">
                                                 <circle class="_3GbTq _2wGBy" cx="21.5" cy="21.5" r="20" fill="none" stroke-width="3"></circle>
@@ -73,14 +74,9 @@ export class Message extends Model {
                                         </div>
                                     </div>
                                 </div>
-                                <img src="#" class="_1JVSX message-photo" style="width: 100%; display:none">
+                                <img src="${this.content}" class="_1JVSX message-photo" style="width: 100%;">
                                 <div class="_1i3Za"></div>
-                            </div>
-                            <div class="message-container-legend">
-                                <div class="_3zb-j ZhF0n">
-                                    <span dir="ltr" class="selectable-text invisible-space copyable-text message-text">Texto da foto</span>
-                                </div>
-                            </div>
+                            </div>                        
                             <div class="_2TvOE">
                                 <div class="_1DZAH text-white" role="button">
                                     <span class="message-time">${Format.timeStampToTime(this.timeStamp)}</span>
@@ -97,6 +93,19 @@ export class Message extends Model {
                         </span>
                     </div>
                 </div>`;
+
+                //Escuta o evento de carregamento da imagem
+                div.querySelector('.message-photo').addEventListener('load', e => {
+
+                    div.querySelector('.message-photo').style.display = 'block';
+
+                    let loadingEl = div.querySelector('._34Olu');
+                    if (loadingEl) loadingEl.style.display = 'none';
+
+                    let containerEl = div.querySelector('._3v3PK');
+                    if (containerEl) containerEl.style.height = 'auto';
+
+                });
             break;
 
             case 'document':
@@ -265,4 +274,40 @@ export class Message extends Model {
             }).catch(err => f(err));
         });
     }
+
+    static sendImage(chatId, from, file) {
+
+        return new Promise((s, f) => {
+
+            // Cria o caminho/endereço do arquivo
+            const fileRef = ref(storage, `${from}/${Date.now()}_${file.name}`);
+
+            // Inicia o upload task assíncrono
+            const uploadTask = uploadBytesResumable(fileRef, file); //upload da imagem, o resumable serve para pausar/retomar/continuar caso tenha oscilação de rede
+
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    console.info('upload', snapshot);
+                }, 
+                (err) => {
+                    console.error(err);
+                    f(err);
+                }, 
+                () => {
+                    
+                    getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {        //quando o arquivo termina de carregar, mostra na tela
+
+                        // Envia a mensagem salvando a URL gerada no conteúdo!
+                        Message.send(chatId, from, 'image', downloadUrl).then(() => {
+                            s();
+                        }).catch(err => f(err));
+
+                    }).catch(err => f(err));
+                }
+            );
+
+        });
+
+    }
+
 }
