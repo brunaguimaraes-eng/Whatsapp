@@ -1,10 +1,13 @@
-import { Firebase } from "../util/Firebase";
-import { Model } from "./Model";
-import { db } from "./../util/Firebase.js";
+//Imports das Bibliotecas Oficiais do Firebase (Nativas)
 import { collection, addDoc, doc, setDoc } from "firebase/firestore";
-import { Format } from "./../util/Format.js";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "./../util/Firebase.js";
+
+//Utilitários Locais
+import { db, storage } from "./../util/Firebase.js";
+import { Format } from "./../util/Format.js";
+
+//Classe Base (Model)
+import { Model } from "./Model";
 
 
 export class Message extends Model {
@@ -270,7 +273,7 @@ export class Message extends Model {
                 setDoc(docRef, {
                     status: 'sent'
                 }, { merge: true }).then(() => {
-                    s(); 
+                    s(docRef); 
                 }).catch(err => f(err));
             }).catch(err => f(err));
         });
@@ -366,7 +369,7 @@ export class Message extends Model {
         return new Promise((s, f) => {
 
             //Cria a mensagem inicial do tipo 'document'
-            Message.send(chatId, from, 'document').then((msgRef) => {
+            Message.send(chatId, from, 'document', '').then((msgRef) => {
 
                 //Faz o upload do arquivo real (PDF, TXT, etc)
                 Message.upload(file, from).then((uploadTask1) => {

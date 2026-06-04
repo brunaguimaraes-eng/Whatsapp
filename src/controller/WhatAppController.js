@@ -1,16 +1,21 @@
+//Imports do Firebase Nativo
+import { onAuthStateChanged } from 'firebase/auth';
+import { query, orderBy, onSnapshot, getDoc } from 'firebase/firestore';
+
+//Utilitários Locais
 import { Format } from './../util/Format.js';
+import { Base64 } from '../util/Base64.js';
+import { db, auth, storage, initAuth as loginFirebase, logout, doc, setDoc } from './../util/Firebase.js';
+
+//Controladores
 import { CameraController } from './CameraController.js';
 import { MicrophoneController } from './MicrophoneController.js';
 import { DocumentPreviewController } from './DocumentPreviewController.js';
-import { db, auth, storage, initAuth as loginFirebase, logout, doc, setDoc } from './../util/Firebase.js';
-import { onAuthStateChanged } from 'firebase/auth';
+
+//Modelos
 import { User } from '../model/User.js';
 import { Chat } from '../model/Chat.js';
 import { Message } from '../model/Message.js';
-import { getDoc } from 'firebase/firestore';
-import { query, orderBy, onSnapshot } from "firebase/firestore";
-import { Base64 } from '../util/Base64.js';
-
 export class WhatAppController{
 
     constructor(){
@@ -826,50 +831,63 @@ export class WhatAppController{
 
             this.el.btnSendDocument.on('click', e => {
 
-                this.el.btnSendDocument.addEventListener('click', e => {
+                let file = this.el.inputDocument.files[0];
+                if (!file) return;
 
-                    let file = this.el.inputDocument.files[0];
+                //Pega a tag img real pelo ID HTML
+                let imagePreviewEl = document.querySelector('#img-panel-document-preview');
+                
+                let base64 = '';
+
+                // Se a imagem existir no preview, extrai o conteúdo dela (o texto data:image/png;base64...)
+                if (imagePreviewEl) {
+                    base64 = imagePreviewEl.src;
+                }
+
+                // Proteção para garantir que a string não vá vazia para o gerador de arquivos
+                if (!base64 || base64 === window.location.href) {
+                    console.warn("⚠️ Não foi possível capturar o Base64 da imagem de preview.");
                     
-                    let previewImageEl = document.querySelector('#image-panel-document-preview');
                     let previewNameEl = document.querySelector('#file-panel-document-preview');
-
-                    let base64 = previewImageEl ? previewImageEl.src : '';
                     let filenameText = previewNameEl ? previewNameEl.innerText : file.name;
+                    
+                    Message.sendDocument(this._contactActive.chatId, this._user.email, file, null, filenameText);
+                    if (this.el.btnClosePanelDocumentPreview) this.el.btnClosePanelDocumentPreview.click();
+                    return;
+                }
 
-                    //Se for PDF, converte o Base64 aqui antes de mandar
-                    if (file.type === 'application/pdf') {
+                let previewNameEl = document.querySelector('#file-panel-document-preview');
+                let filenameText = previewNameEl ? previewNameEl.innerText : file.name;
+
+                if (file.type === 'application/pdf') {
+                    
+                    Base64.toFile(base64).then((filePreview) => {
                         
-                        Base64.toFile(base64).then((filePreview) => {
-                            
-                            // Envia o arquivo real + o arquivo de preview gerado
-                            Message.sendDocument(
-                                this._contactActive.chatId, 
-                                this._user.email, 
-                                file, 
-                                filePreview, 
-                                filenameText
-                            );
-
-                        });
-
-                    } else {
-                        //e não for PDF, envia apenas o arquivo puro (o preview vai como null)
                         Message.sendDocument(
                             this._contactActive.chatId, 
                             this._user.email, 
                             file, 
-                            null, 
+                            filePreview, 
                             filenameText
                         );
-                    }
 
-                    // Fecha o painel de preview após o disparo
-                    if (this.el.btnClosePanelDocumentPreview) {
-                        this.el.btnClosePanelDocumentPreview.click();
-                    }
+                    }).catch(err => console.error("Erro ao converter preview:", err));
 
-                });
-            })
+                } else {
+                    Message.sendDocument(
+                        this._contactActive.chatId, 
+                        this._user.email, 
+                        file, 
+                        null, 
+                        filenameText
+                    );
+                }
+
+                if (this.el.btnClosePanelDocumentPreview) {
+                    this.el.btnClosePanelDocumentPreview.click();
+                }
+
+            });
 
             this.el.btnAttachContact.on('click', e => {
                 
