@@ -6,6 +6,7 @@ import { Format } from "./../util/Format.js";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "./../util/Firebase.js";
 
+
 export class Message extends Model {
 
     constructor() {
@@ -309,5 +310,105 @@ export class Message extends Model {
         });
 
     }
+
+    static upload(file, from) {
+        return new Promise((s, f) => {
+
+            // Cria a referência na nuvem
+            const fileRef = ref(storage, `${from}/${Date.now()}_${file.name}`);
+            const uploadTask = uploadBytesResumable(fileRef, file);
+
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    console.info('upload:', snapshot);
+                }, 
+                (err) => {
+                    console.error(err);
+                    f(err);
+                }, 
+                () => {
+                    //Devolve o uploadTask para extrairmos a URL no próximo método
+                    s(uploadTask);
+                }
+            );
+
+        });
+
+    }
+
+    static sendImage(chatId, from, file) {
+        return new Promise((s, f) => {
+
+            //Executa o upload genérico (que devolve a tarefa de upload)
+            Message.upload(file, from).then((uploadTask) => {
+
+                //Extrai a URL estável do Firebase Moderno usando a referência do snapshot
+                getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
+
+                    // Grava no banco de dados Firestore
+                    Message.send(
+                        chatId,
+                        from,
+                        'image',
+                        downloadUrl // Aqui entra a URL que traduz o 'snapshot.downloadURL'
+                    ).then(() => {
+                        s();
+                    }).catch(err => f(err));
+
+                }).catch(err => f(err));
+
+            }).catch(err => f(err));
+
+        });
+    }
+
+    static sendDocument(chatId, from, file, filePreview = null, filenameText = '') {
+        return new Promise((s, f) => {
+
+            //Cria a mensagem inicial do tipo 'document'
+            Message.send(chatId, from, 'document').then((msgRef) => {
+
+                //Faz o upload do arquivo real (PDF, TXT, etc)
+                Message.upload(file, from).then((uploadTask1) => {
+
+                    getDownloadURL(uploadTask1.snapshot.ref).then((downloadFile) => {
+
+                        // Criamos o objeto base de metadados para salvar no Firestore
+                        let docData = {
+                            content: downloadFile,
+                            filename: filenameText || file.name,
+                            size: file.size,
+                            fileType: file.type,
+                            status: 'sent'
+                        };
+
+                        //Se for um PDF (ou seja, se tiver um arquivo de preview), faz o upload dele também
+                        if (filePreview) {
+                            Message.upload(filePreview, from).then((uploadTask2) => {
+
+                                getDownloadURL(uploadTask2.snapshot.ref).then((downloadPreview) => {
+                                    
+                                    // Adiciona o link do preview ao objeto
+                                    docData.preview = downloadPreview;
+
+                                    // Salva tudo com o setDoc moderno
+                                    setDoc(msgRef, docData, { merge: true }).then(() => s()).catch(err => f(err));
+
+                                }).catch(err => f(err));
+                            }).catch(err => f(err));
+
+                        } else {
+                            //Se NÃO for PDF (não tem preview), salva direto os metadados básicos
+                            setDoc(msgRef, docData, { merge: true }).then(() => s()).catch(err => f(err));
+                        }
+
+                    }).catch(err => f(err));
+                }).catch(err => f(err));
+            }).catch(err => f(err));
+        });
+    }
+
+
+
 
 }

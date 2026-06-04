@@ -9,6 +9,7 @@ import { Chat } from '../model/Chat.js';
 import { Message } from '../model/Message.js';
 import { getDoc } from 'firebase/firestore';
 import { query, orderBy, onSnapshot } from "firebase/firestore";
+import { Base64 } from '../util/Base64.js';
 
 export class WhatAppController{
 
@@ -825,7 +826,49 @@ export class WhatAppController{
 
             this.el.btnSendDocument.on('click', e => {
 
-                console.log('send document');
+                this.el.btnSendDocument.addEventListener('click', e => {
+
+                    let file = this.el.inputDocument.files[0];
+                    
+                    let previewImageEl = document.querySelector('#image-panel-document-preview');
+                    let previewNameEl = document.querySelector('#file-panel-document-preview');
+
+                    let base64 = previewImageEl ? previewImageEl.src : '';
+                    let filenameText = previewNameEl ? previewNameEl.innerText : file.name;
+
+                    //Se for PDF, converte o Base64 aqui antes de mandar
+                    if (file.type === 'application/pdf') {
+                        
+                        Base64.toFile(base64).then((filePreview) => {
+                            
+                            // Envia o arquivo real + o arquivo de preview gerado
+                            Message.sendDocument(
+                                this._contactActive.chatId, 
+                                this._user.email, 
+                                file, 
+                                filePreview, 
+                                filenameText
+                            );
+
+                        });
+
+                    } else {
+                        //e não for PDF, envia apenas o arquivo puro (o preview vai como null)
+                        Message.sendDocument(
+                            this._contactActive.chatId, 
+                            this._user.email, 
+                            file, 
+                            null, 
+                            filenameText
+                        );
+                    }
+
+                    // Fecha o painel de preview após o disparo
+                    if (this.el.btnClosePanelDocumentPreview) {
+                        this.el.btnClosePanelDocumentPreview.click();
+                    }
+
+                });
             })
 
             this.el.btnAttachContact.on('click', e => {
