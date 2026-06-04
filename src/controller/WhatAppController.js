@@ -834,30 +834,27 @@ export class WhatAppController{
                 let file = this.el.inputDocument.files[0];
                 if (!file) return;
 
-                //Pega a tag img real pelo ID HTML
+                // Pega a tag img real pelo ID HTML
                 let imagePreviewEl = document.querySelector('#img-panel-document-preview');
                 
                 let base64 = '';
 
-                // Se a imagem existir no preview, extrai o conteúdo dela (o texto data:image/png;base64...)
+                // Se a imagem existir no preview, extrai o conteúdo dela
                 if (imagePreviewEl) {
                     base64 = imagePreviewEl.src;
                 }
+
+                // 🌟 DEFINIÇÃO ÚNICA: Captura o nome real do seu computador de uma vez por todas
+                let filenameText = file.name;
 
                 // Proteção para garantir que a string não vá vazia para o gerador de arquivos
                 if (!base64 || base64 === window.location.href) {
                     console.warn("⚠️ Não foi possível capturar o Base64 da imagem de preview.");
                     
-                    let previewNameEl = document.querySelector('#file-panel-document-preview');
-                    let filenameText = previewNameEl ? previewNameEl.innerText : file.name;
-                    
                     Message.sendDocument(this._contactActive.chatId, this._user.email, file, null, filenameText);
                     if (this.el.btnClosePanelDocumentPreview) this.el.btnClosePanelDocumentPreview.click();
                     return;
                 }
-
-                let previewNameEl = document.querySelector('#file-panel-document-preview');
-                let filenameText = previewNameEl ? previewNameEl.innerText : file.name;
 
                 if (file.type === 'application/pdf') {
                     

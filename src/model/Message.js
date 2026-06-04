@@ -31,6 +31,24 @@ export class Message extends Model {
     get id() { return this._data.id; }
     set id(value) { this._data.id = value; }
 
+    get preview() { return this._data.preview; }
+    set preview(value) { this._data.preview = value; }
+
+    get info() { return this._data.info; }
+    set info(value) { this._data.info = value; }
+
+    get fileType() { return this._data.fileType; }
+    set fileType(value) { this._data.fileType = value; }
+
+    get size() { return this._data.size; }
+    set size(value) { this._data.size = value; }
+
+    get from() { return this._data.from; }
+    set from(value) { this._data.from = value; }
+
+    get filename() { return this._data.filename; }
+    set filename(value) { this._data.filename = value; }
+
     //GERA O BALÃO DE MENSAGEM NA TELA
     getViewElement(me = true) {
 
@@ -113,36 +131,46 @@ export class Message extends Model {
             break;
 
             case 'document':
+                // 🔍 Coleta os metadados vindos do banco de dados (Firestore)
+                let docPreview = this._data.preview || this.preview || '';
+                let docFilename = this._data.filename || this._data.name || this._data.fileName || this.filename || this.name || 'Arquivo.pdf';
+                let docFileType = this._data.fileType || this._data.type || this.fileType || 'PDF';
+                let docSize = this._data.size || this.size || 0;
+
+                // Transforma o tamanho em KB ou MB legível
+                let displaySize = '';
+                if (docSize > 0) {
+                    displaySize = docSize > 1024 * 1024 ? 
+                        (docSize / (1024 * 1024)).toFixed(1) + ' MB' : 
+                        (docSize / 1024).toFixed(0) + ' KB';
+                }
+
                 div.innerHTML = 
                 `<div class="_3_7SH _1ZPgd" id="_${this.id}">
                     <div class="_1fnMt _2CORf">
-                        <a class="_1vKRe" href="#">
-                            <div class="_2jTyA" style="background-image: url()"></div>
+                        <a class="_1vKRe" href="${this.content}" target="_blank">
+                            <div class="_2jTyA" style="background-image: url(${docPreview}); display: ${docPreview ? 'block' : 'none'}; height: 150px; background-size: cover; background-position: center;"></div>
+                            
                             <div class="_12xX7">
                                 <div class="_3eW69">
                                     <div class="JdzFp message-file-icon icon-doc-pdf"></div>
                                 </div>
                                 <div class="nxILt">
-                                    <span dir="auto" class="message-filename">Arquivo.pdf</span>
+                                    <span dir="auto" class="message-filename">${docFilename}</span>
                                 </div>
                                 <div class="_17viz">
                                     <span data-icon="audio-download" class="message-file-download">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="34" height="34">
-                                            <path fill="#263238" fill-opacity=".5" d="M17 2c8.3 0 15 6.7 15 15s-6.7 15-15 15S2 25.3 2 17 8.7 2 17 2m0-1C8.2 1 1 8.2 1 17s7.2 16 16 16 16-7.2 16-16S25.8 1 17 1z"></path>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                            <path fill="#919191" d="M12 15.5l4.5-4.5h-3.5V5h-2v6H7.5l4.5 4.5zM5 17h14v2H5v-2z"></path>
                                         </svg>
                                     </span>
-                                    <div class="_3SUnz message-file-load" style="display:none">
-                                        <svg class="_1UDDE" width="32" height="32" viewBox="0 0 43 43">
-                                            <circle class="_3GbTq _37WZ9" cx="21.5" cy="21.5" r="20" fill="none" stroke-width="3"></circle>
-                                        </svg>
-                                    </div>
                                 </div>
                             </div>
                         </a>
                         <div class="_3cMIj">
-                            <span class="PyPig message-file-info">32 páginas</span>
-                            <span class="PyPig message-file-type">PDF</span>
-                            <span class="PyPig message-file-size">4 MB</span>
+                            <span class="PyPig message-file-info"></span>
+                            <span class="PyPig message-file-type">${docFileType.includes('/') ? docFileType.split('/')[1].toUpperCase() : docFileType.toUpperCase()}</span>
+                            <span class="PyPig message-file-size">${displaySize || '4 MB'}</span>
                         </div>
                         <div class="_3Lj_s">
                             <div class="_1DZAH" role="button">
@@ -317,7 +345,7 @@ export class Message extends Model {
     static upload(file, from) {
         return new Promise((s, f) => {
 
-            // Cria a referência na nuvem
+            // Cria a referência na nuvem usando a sintaxe modular
             const fileRef = ref(storage, `${from}/${Date.now()}_${file.name}`);
             const uploadTask = uploadBytesResumable(fileRef, file);
 
@@ -330,13 +358,12 @@ export class Message extends Model {
                     f(err);
                 }, 
                 () => {
-                    //Devolve o uploadTask para extrairmos a URL no próximo método
-                    s(uploadTask);
+                    // 🚀 CORREÇÃO CIRÚRGICA: Resolvemos devolvendo direto o snapshot estável!
+                    s(uploadTask.snapshot);
                 }
             );
 
         });
-
     }
 
     static sendImage(chatId, from, file) {
@@ -368,13 +395,14 @@ export class Message extends Model {
     static sendDocument(chatId, from, file, filePreview = null, filenameText = '') {
         return new Promise((s, f) => {
 
-            //Cria a mensagem inicial do tipo 'document'
+            // Cria a mensagem inicial do tipo 'document'
             Message.send(chatId, from, 'document', '').then((msgRef) => {
 
-                //Faz o upload do arquivo real (PDF, TXT, etc)
-                Message.upload(file, from).then((uploadTask1) => {
+                // Faz o upload do arquivo real (PDF, TXT, etc)
+                Message.upload(file, from).then((snapshot1) => {
 
-                    getDownloadURL(uploadTask1.snapshot.ref).then((downloadFile) => {
+                    // 🚀 CORREÇÃO CIRÚRGICA: Lemos a referência direto do snapshot resolvido
+                    getDownloadURL(snapshot1.ref).then((downloadFile) => {
 
                         // Criamos o objeto base de metadados para salvar no Firestore
                         let docData = {
@@ -385,23 +413,23 @@ export class Message extends Model {
                             status: 'sent'
                         };
 
-                        //Se for um PDF (ou seja, se tiver um arquivo de preview), faz o upload dele também
+                        // Se for um PDF (ou seja, se tiver um arquivo de preview), faz o upload dele também
                         if (filePreview) {
-                            Message.upload(filePreview, from).then((uploadTask2) => {
+                            Message.upload(filePreview, from).then((snapshot2) => {
 
-                                getDownloadURL(uploadTask2.snapshot.ref).then((downloadPreview) => {
+                                getDownloadURL(snapshot2.ref).then((downloadPreview) => {
                                     
                                     // Adiciona o link do preview ao objeto
                                     docData.preview = downloadPreview;
 
-                                    // Salva tudo com o setDoc moderno
+                                    // Salva tudo com o setDoc moderno do Firebase v9+
                                     setDoc(msgRef, docData, { merge: true }).then(() => s()).catch(err => f(err));
 
                                 }).catch(err => f(err));
                             }).catch(err => f(err));
 
                         } else {
-                            //Se NÃO for PDF (não tem preview), salva direto os metadados básicos
+                            // Se NÃO for PDF (não tem preview), salva direto os metadados básicos
                             setDoc(msgRef, docData, { merge: true }).then(() => s()).catch(err => f(err));
                         }
 
