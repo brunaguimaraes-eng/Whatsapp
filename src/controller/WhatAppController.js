@@ -286,11 +286,12 @@ export class WhatAppController{
                 let message = new Message();
                 message.fromJSON(data);
 
+                //SE A MENSAGEM NÃO EXISTE NA TELA: Cria o balão do zero
                 if(!this.el.panelMessagesContainer.querySelector('#_' + data.id)){      
 
                     let me = (data.from === this._user.email);
 
-                    if (!me && data.status !== 'read') {                            
+                    if (!me && data.status !== 'read') {                                            
                         
                         // Criamos a referência do documento atual
                         setDoc(doc.ref, {
@@ -301,16 +302,33 @@ export class WhatAppController{
 
                     }
 
-
                     let view = message.getViewElement(me);
-
                     this.el.panelMessagesContainer.appendChild(view);
+
+                //Se o balão já existe, força a atualização reativa dos dados na tela!
                 } else {
                     
                     let msgEl = this.el.panelMessagesContainer.querySelector('#_' + data.id);
 
                     if(msgEl){
 
+                        let me = (data.from === this._user.email);
+                        let view = message.getViewElement(me);
+
+                        // Sobrescreve o HTML interno com os dados novos do Firebase
+                        msgEl.innerHTML = view.innerHTML;
+
+                        //Sincroniza dinamicamente os elementos de download/upload se for um documento
+                        if (data.type === 'document') {
+                            let isUploading = (data.status === 'wait');
+                            let loaderContainer = msgEl.querySelector('.message-file-load');
+                            let downloadIcon = msgEl.querySelector('.message-file-download');
+                            
+                            if (loaderContainer) loaderContainer.style.display = isUploading ? 'flex' : 'none';
+                            if (downloadIcon) downloadIcon.style.display = isUploading ? 'none' : 'block';
+                        }
+
+                        // Atualiza o tique de status (reloginho, check verde, etc.)
                         let statusEl = msgEl.querySelector('.message-status');
                         if (statusEl){
                             statusEl.innerHTML = message.getStatusViewElement().innerHTML;
@@ -844,7 +862,6 @@ export class WhatAppController{
                     base64 = imagePreviewEl.src;
                 }
 
-                // 🌟 DEFINIÇÃO ÚNICA: Captura o nome real do seu computador de uma vez por todas
                 let filenameText = file.name;
 
                 // Proteção para garantir que a string não vá vazia para o gerador de arquivos
