@@ -11,6 +11,7 @@ import { db, auth, storage, initAuth as loginFirebase, logout, doc, setDoc } fro
 import { CameraController } from './CameraController.js';
 import { MicrophoneController } from './MicrophoneController.js';
 import { DocumentPreviewController } from './DocumentPreviewController.js';
+import { ContactsController } from './ContactsController.js';
 
 //Modelos
 import { User } from '../model/User.js';
@@ -893,11 +894,23 @@ export class WhatAppController{
 
             this.el.btnAttachContact.on('click', e => {
                 
-                this.el.modalContacts.show();
+                this._contactsController = new ContactsController(this.el.modalContacts, this._user);
+
+                this._contactsController.on('select', contact => {
+
+                    Message.sendContact(
+                        this._contactActive.chatId,
+                        this._user.email,
+                        contact
+                    );
+                });
+                
+                this._contactsController.open();
+
             });
 
             this.el.btnCloseModalContacts.on('click', e =>{
-                this.el.modalContacts.hide();
+                this._contactsController.close();
             });
 
             this.el.btnSendMicrophone.on('click', e =>{
