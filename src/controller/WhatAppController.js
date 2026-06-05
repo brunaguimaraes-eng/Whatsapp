@@ -308,35 +308,23 @@ export class WhatAppController{
                 //Se o balão já existe, força a atualização reativa dos dados na tela!
                 } else {
                     
-                    let msgEl = this.el.panelMessagesContainer.querySelector('#_' + data.id);
+                    //Procuramos o elemento interno que possui o ID do banco
+                    let msgElInner = this.el.panelMessagesContainer.querySelector('#_' + data.id);
 
-                    if(msgEl){
+                    if (msgElInner) {
+                        // Subimos um nível até o container pai real do balão (a div com a classe 'message')
+                        let msgElReal = msgElInner.closest('.message');
 
-                        let me = (data.from === this._user.email);
-                        let view = message.getViewElement(me);
+                        if (msgElReal) {
+                            let me = (data.from === this._user.email);
+                            let view = message.getViewElement(me);
 
-                        // Sobrescreve o HTML interno com os dados novos do Firebase
-                        msgEl.innerHTML = view.innerHTML;
-
-                        //Sincroniza dinamicamente os elementos de download/upload se for um documento
-                        if (data.type === 'document') {
-                            let isUploading = (data.status === 'wait');
-                            let loaderContainer = msgEl.querySelector('.message-file-load');
-                            let downloadIcon = msgEl.querySelector('.message-file-download');
-                            
-                            if (loaderContainer) loaderContainer.style.display = isUploading ? 'flex' : 'none';
-                            if (downloadIcon) downloadIcon.style.display = isUploading ? 'none' : 'block';
+                            // Isso mantém as classes 'message-out' (direita) e 'message-in' (esquerda) intactas.
+                            msgElReal.replaceWith(view);
                         }
-
-                        // Atualiza o tique de status (reloginho, check verde, etc.)
-                        let statusEl = msgEl.querySelector('.message-status');
-                        if (statusEl){
-                            statusEl.innerHTML = message.getStatusViewElement().innerHTML;
-                        }
-
                     }
 
-                }         
+                }  
             });
 
             if (autoScroll) {
