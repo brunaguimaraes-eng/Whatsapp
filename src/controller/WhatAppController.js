@@ -1,17 +1,20 @@
 //Imports do Firebase Nativo
 import { onAuthStateChanged } from 'firebase/auth';
 import { query, orderBy, onSnapshot, getDoc } from 'firebase/firestore';
+import { getDownloadURL } from 'firebase/storage';
 
 //Utilitários Locais
 import { Format } from './../util/Format.js';
 import { Base64 } from '../util/Base64.js';
 import { db, auth, storage, initAuth as loginFirebase, logout, doc, setDoc } from './../util/Firebase.js';
+import { Upload } from './../util/Upload.js';
 
 //Controladores
 import { CameraController } from './CameraController.js';
 import { MicrophoneController } from './MicrophoneController.js';
 import { DocumentPreviewController } from './DocumentPreviewController.js';
 import { ContactsController } from './ContactsController.js';
+
 
 //Modelos
 import { User } from '../model/User.js';
@@ -513,6 +516,37 @@ export class WhatAppController{
                 this.el.inputProfilePhoto.click();
 
             });
+
+            this.el.inputProfilePhoto.on('change', e => {
+
+                if(e.target.files && e.target.files.length > 0){
+
+                    let file = e.target.files[0];
+
+                    let currentUser = this._user || this.user;
+
+                    if(!currentUser){
+                        console.error("Erro: Usuário nao encontrado");
+                        return;
+                    }
+
+                    Upload.send(file, currentUser.email).then(snapShot => {
+
+                        getDownloadURL(snapShot.ref).then(url => {
+
+                            // Atualiza a foto e salva usando a mesma variável segura
+                            currentUser.photo = url;
+                            currentUser.save();
+
+                            console.log("Foto de perfil atualizada com sucesso!");
+                            
+                        }).catch(err => console.error("Erro ao obter URL da foto:", err));
+                    }).catch(err => console.error("Erro ao realizar upload:", err));
+
+                }
+            });
+
+
 
             this.el.inputNamePanelEditProfile.on('keypress', e => {
 
