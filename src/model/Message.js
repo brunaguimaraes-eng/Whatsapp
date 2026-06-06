@@ -239,20 +239,29 @@ export class Message extends Model {
 
             case 'audio':
                 div.innerHTML = `                
-                <div class="_3_7SH _1ZPgd ${me ? 'message-out' : 'message-in'}" id="_${this.id}" style="margin-bottom: 6px; display: flex; flex-direction: column; max-width: 360px;">
+                <div class="_3_7SH _1ZPgd ${me ? 'message-out' : 'message-in'}" id="_${this.id}" style="margin-bottom: 6px; display: flex; flex-direction: column; max-width: 360px; position: relative !important;">
                     
-                    <div class="_1QMEq _1kZiz fS1bA" style="display: flex; align-items: center; padding: 12px 14px 4px 14px; gap: 10px; min-width: 310px;">
+                    <div class="_1QMEq _1kZiz fS1bA" style="display: flex !important; align-items: center !important; padding: 12px 14px 14px 14px !important; gap: 14px !important; min-width: 320px; height: auto !important;">
                         
-                        <div class="_2fuJy" style="flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                            <div class="_1WliW" style="height: 40px; width: 40px; position: relative; display: flex; align-items: center; justify-content: center;">
+                        <div class="_2fuJy" style="flex-shrink: 0; position: relative; width: 48px; height: 48px; display: block !important;">
+                            <div class="_1WliW" style="width: 100%; height: 100%; border-radius: 50%; position: relative;">
                                 <img src="#" class="Qgzj8 gqwaM message-photo" style="display:none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
                                 <div class="_3ZW2E" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
                                     <span data-icon="default-user">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 212 212" width="40" height="40">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 212 212" width="48" height="48">
                                             <path fill="#DFE5E7" d="M106.251.5C164.653.5 212 47.846 212 106.25S164.653 212 106.25 212C47.846 212 .5 164.654.5 106.25S47.846.5 106.251.5z"></path>
                                         </svg>
                                     </span>
                                 </div>
+                            </div>
+                            
+                            <div class="_1mbqw" style="position: absolute; bottom: -2px; right: -3px; z-index: 3; background: ${me ? '#e1f5fe' : '#ffffff'}; border-radius: 50%; padding: 2px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+                                <span data-icon="ptt-out-blue">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 26" width="13" height="17">
+                                        <path fill="#03A9F4" d="M9.217 24.401c-1.158 0-2.1-.941-2.1-2.1v-2.366c-3.111-.476-5.467-3.159-5.467-6.402v-1.748h1.4v1.748c0 3.143 2.557 5.7 5.7 5.7s5.7-2.557 5.7-5.7v-1.748h1.4v1.748c0 3.243-2.356 5.926-5.467 6.402v2.366c0 1.159-.942 2.1-2.1 2.1z"></path>
+                                        <path fill="#03A9F4" d="M9.367 15.668a2.765 2.765 0 0 0 2.765-2.765V5.26a2.765 2.765 0 0 0-5.53 0v7.643a2.765 2.765 0 0 0 2.765 2.765z"></path>
+                                    </svg>
+                                </span>
                             </div>
                         </div>
 
@@ -264,7 +273,7 @@ export class Message extends Model {
                             <button class="_2pQE3 audio-play" style="background: transparent; border: none; padding: 0; cursor: pointer; position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; outline: none;">
                                 <span data-icon="audio-play">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="28" height="28">
-                                        <path fill="rgba(0, 0, 0, 0.4)" d="M8.5 8.7c0-1.7 1.2-2.4 2.6-1.5l14 8.7c1.4.9 1.4 2.3 0 3.2l-14 8.7c-1.4.9-2.6.2-2.6-1.5V8.7z"></path>
+                                        <path fill="rgba(0, 0, 0, 0.45)" d="M8.5 8.7c0-1.7 1.2-2.4 2.6-1.5l14 8.7c1.4.9 1.4 2.3 0 3.2l-14 8.7c-1.4.9-2.6.2-2.6-1.5V8.7z"></path>
                                     </svg>
                                 </span>
                             </button>
@@ -278,35 +287,28 @@ export class Message extends Model {
                             </button>
                         </div>
 
-                        <div class="_1_Gu6" style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px; justify-content: center; margin-left: -6px; margin-right: 6px;">
-                            <div class="_1sLSi" style="width: 100%; height: 4px; background: rgba(0, 0, 0, 0.08); border-radius: 2px; position: relative;">
+                        <div class="_1_Gu6" style="flex-grow: 1 !important; display: flex !important; flex-direction: column !important; gap: 6px !important; justify-content: center !important; position: static !important; transform: none !important;">
+                            
+                            <div class="_1sLSi" style="width: 100% !important; height: 4px !important; background: rgba(0, 0, 0, 0.08) !important; border-radius: 2px !important; position: relative !important; display: block !important;">
                                 <span class="nDKsM" style="width: 0%; height: 100%; background: ${me ? '#00af9c' : '#51b695'}; border-radius: 2px; display: block; position: absolute; left: 0; top: 0;"></span>
                                 <input type="range" min="0" max="100" value="0" class="_3geJ8" style="position: absolute; top: -6px; left: 0; width: 100%; height: 16px; opacity: 0; cursor: pointer; margin: 0;">
                                 <audio src="${this.content}" preload="auto"></audio>
                             </div>
 
-                            <div class="message-audio-duration" style="font-size: 11px; color: rgba(0, 0, 0, 0.45); line-height: 1;">0:00</div>
-                        </div>
-
-                        <div class="audio-speed-container" style="flex-shrink: 0; display: flex; align-items: center;">
-                            <button class="audio-speed-btn" style="background: rgba(0, 0, 0, 0.05); border: none; border-radius: 12px; padding: 3px 6px; cursor: pointer; font-size: 10px; font-weight: bold; color: rgba(0, 0, 0, 0.5); outline: none;">1.0×</button>
-                        </div>
-
-                        <div class="_1mbqw" style="flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                            <div class="QnDup" style="display: flex; align-items: center;">
-                                <span data-icon="ptt-out-blue">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 26" width="16" height="22">
-                                        <path fill="${me ? '#03A9F4' : '#a0a0a0'}" d="M9.217 24.401c-1.158 0-2.1-.941-2.1-2.1v-2.366c-3.111-.476-5.467-3.159-5.467-6.402v-1.748h1.4v1.748c0 3.143 2.557 5.7 5.7 5.7s5.7-2.557 5.7-5.7v-1.748h1.4v1.748c0 3.243-2.356 5.926-5.467 6.402v2.366c0 1.159-.942 2.1-2.1 2.1z"></path>
-                                        <path fill="${me ? '#03A9F4' : '#a0a0a0'}" d="M9.367 15.668a2.765 2.765 0 0 0 2.765-2.765V5.26a2.765 2.765 0 0 0-5.53 0v7.643a2.765 2.765 0 0 0 2.765 2.765z"></path>
-                                    </svg>
-                                </span>
+                            <div style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; position: static !important; margin-top: 2px !important;">
+                                <div class="custom-audio-duration" style="font-size: 11px !important; color: rgba(0, 0, 0, 0.45) !important; line-height: 1 !important; margin: 0 !important;">0:00</div>
+                                <div class="custom-audio-total" style="font-size: 11px !important; color: rgba(0, 0, 0, 0.45) !important; line-height: 1 !important; margin: 0 !important;">0:00</div>
                             </div>
+                        </div>
+
+                        <div class="audio-speed-container" style="flex-shrink: 0; display: flex; align-items: center; margin-left: 2px;">
+                            <button class="audio-speed-btn" style="background: rgba(0, 0, 0, 0.04); border: none; border-radius: 12px; padding: 3px 6px; cursor: pointer; font-size: 10px; font-weight: bold; color: rgba(0, 0, 0, 0.4); outline: none;">1.0×</button>
                         </div>
 
                     </div>
 
-                    <div style="display: flex; justify-content: flex-end; align-items: center; padding: 0 12px 6px 0; gap: 4px; margin-top: -2px;">
-                        <span class="message-time" style="font-size: 11px; color: rgba(0, 0, 0, 0.4); text-align: right;">${Format.timeStampToTime(this.timeStamp)}</span>
+                    <div style="display: flex; justify-content: flex-end; align-items: center; padding: 0 14px 6px 0; gap: 4px; margin-top: -4px;">
+                        <span class="message-time" style="font-size: 11px; color: rgba(0, 0, 0, 0.4);">${Format.timeStampToTime(this.timeStamp)}</span>
                         ${me ? `
                         <div class="_3S8Q-" role="button" style="display: flex; align-items: center;">
                             <span data-icon="status-dblcheck">
@@ -320,18 +322,20 @@ export class Message extends Model {
 
                 </div>`;
 
-                // 🎙️ SELETORES DO JAVASCRIPT
+                // 🎙️ SELETORES DO JAVASCRIPT CORRIGIDOS COM OS NOVOS NOMES CUSTOMIZADOS
                 let audioEl = div.querySelector('audio');
                 let loadEl = div.querySelector('.audio-load');
                 let btnPlay = div.querySelector('.audio-play');
                 let btnPause = div.querySelector('.audio-pause');
                 let inputRange = div.querySelector('[type=range]');
-                let audioDuration = div.querySelector('.message-audio-duration');
+                let audioDuration = div.querySelector('.custom-audio-duration'); // <-- Atualizado
+                let audioTotalDuration = div.querySelector('.custom-audio-total'); // <-- Atualizado
                 let progressSpan = div.querySelector('.nDKsM');
-                let btnSpeed = div.querySelector('.audio-speed-btn'); // <-- Seleciona o botão novo
+                let btnSpeed = div.querySelector('.audio-speed-btn');
 
                 if (this.duration) {
-                    audioDuration.innerHTML = Format.toTime(this.duration * 1000);
+                    let formattedTotal = Format.toTime(this.duration * 1000);
+                    if (audioTotalDuration) audioTotalDuration.innerHTML = formattedTotal;
                 }
 
                 if (this.photo) {
@@ -344,7 +348,7 @@ export class Message extends Model {
                     if (avatarPadrao) avatarPadrao.hide();
                 }
 
-                // --- OUVINTES DO CONTROLADOR DE ÁUDIO ---
+                // --- OUVINTES DO MOTOR DE ÁUDIO ---
                 audioEl.onloadeddata = e => {
                     loadEl.hide();
                     btnPlay.show();
@@ -391,7 +395,6 @@ export class Message extends Model {
                     }
                 });
 
-                // 👇 ⚡ LÓGICA DO ACELERADOR DE ÁUDIO
                 if (btnSpeed) {
                     btnSpeed.on('click', () => {
                         if (audioEl.playbackRate === 1.0) {
@@ -405,8 +408,8 @@ export class Message extends Model {
                         } else {
                             audioEl.playbackRate = 1.0;
                             btnSpeed.innerHTML = '1.0×';
-                            btnSpeed.style.background = 'rgba(0, 0, 0, 0.05)';
-                            btnSpeed.style.color = 'rgba(0, 0, 0, 0.5)';
+                            btnSpeed.style.background = 'rgba(0, 0, 0, 0.04)';
+                            btnSpeed.style.color = 'rgba(0, 0, 0, 0.4)';
                         }
                     });
                 }
