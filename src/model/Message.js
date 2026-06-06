@@ -49,6 +49,12 @@ export class Message extends Model {
     get filename() { return this._data.filename; }
     set filename(value) { this._data.filename = value; }
 
+    get photo() { return this._data.photo; }
+    set photo(value) { this._data.photo = value; }
+
+    get duration() { return this._data.duration; }
+    set duration(value) { this._data.duration = value; }
+
     //GERA O BALÃO DE MENSAGEM NA TELA
     getViewElement(me = true) {
 
@@ -233,20 +239,178 @@ export class Message extends Model {
 
             case 'audio':
                 div.innerHTML = `                
-                <div class="font-style _3DFk6 tail" id="_${this.id}">
-                    <span class="tail-container"></span>
-                    <span class="tail-container highlight"></span>
-                    <div class="Tkt2p">
-                        <div class="_3zb-j ZhF0n">
-                            <span dir="ltr" class="selectable-text invisible-space message-text">Oi, tudo bem?</span>
-                        </div>
-                        <div class="_2f-RV">
-                            <div class="_1DZAH" role="button">
-                                <span class="message-time">${Format.timeStampToTime(this.timeStamp)}</span>
+                <div class="_3_7SH _1ZPgd ${me ? 'message-out' : 'message-in'}" id="_${this.id}" style="margin-bottom: 6px; display: flex; flex-direction: column; max-width: 360px;">
+                    
+                    <div class="_1QMEq _1kZiz fS1bA" style="display: flex; align-items: center; padding: 12px 14px 4px 14px; gap: 10px; min-width: 310px;">
+                        
+                        <div class="_2fuJy" style="flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                            <div class="_1WliW" style="height: 40px; width: 40px; position: relative; display: flex; align-items: center; justify-content: center;">
+                                <img src="#" class="Qgzj8 gqwaM message-photo" style="display:none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                <div class="_3ZW2E" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                    <span data-icon="default-user">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 212 212" width="40" height="40">
+                                            <path fill="#DFE5E7" d="M106.251.5C164.653.5 212 47.846 212 106.25S164.653 212 106.25 212C47.846 212 .5 164.654.5 106.25S47.846.5 106.251.5z"></path>
+                                        </svg>
+                                    </span>
+                                </div>
                             </div>
                         </div>
+
+                        <div class="E5U9C" style="position: relative; width: 34px; height: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                            <svg class="_1UDDE audio-load" width="34" height="34" viewBox="0 0 43 43" style="position: absolute; display: none;">
+                                <circle class="_3GbTq _37WZ9" cx="21.5" cy="21.5" r="20" fill="none" stroke="${me ? '#00af9c' : '#51b695'}" stroke-width="3"></circle>
+                            </svg>
+                            
+                            <button class="_2pQE3 audio-play" style="background: transparent; border: none; padding: 0; cursor: pointer; position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; outline: none;">
+                                <span data-icon="audio-play">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="28" height="28">
+                                        <path fill="rgba(0, 0, 0, 0.4)" d="M8.5 8.7c0-1.7 1.2-2.4 2.6-1.5l14 8.7c1.4.9 1.4 2.3 0 3.2l-14 8.7c-1.4.9-2.6.2-2.6-1.5V8.7z"></path>
+                                    </svg>
+                                </span>
+                            </button>
+                            
+                            <button class="_2pQE3 audio-pause" style="background: transparent; border: none; padding: 0; cursor: pointer; position: absolute; width: 100%; height: 100%; display: none; align-items: center; justify-content: center; outline: none;">
+                                <span data-icon="audio-pause">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="28" height="28">
+                                        <path fill="${me ? '#00af9c' : '#51b695'}" d="M9.2 25c0 .5.4 1 .9 1h3.6c.5 0 .9-.5.9-1V9c0-.5-.4-1-.9-1h-3.6c-.5 0-.9.5-.9 1v16zm10.2 0c0 .5.4 1 .9 1h3.6c.5 0 .9-.5.9-1V9c0-.5-.4-1-.9-1h-3.6c-.5 0-.9.5-.9 1v16z"></path>
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="_1_Gu6" style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px; justify-content: center; margin-left: -6px; margin-right: 6px;">
+                            <div class="_1sLSi" style="width: 100%; height: 4px; background: rgba(0, 0, 0, 0.08); border-radius: 2px; position: relative;">
+                                <span class="nDKsM" style="width: 0%; height: 100%; background: ${me ? '#00af9c' : '#51b695'}; border-radius: 2px; display: block; position: absolute; left: 0; top: 0;"></span>
+                                <input type="range" min="0" max="100" value="0" class="_3geJ8" style="position: absolute; top: -6px; left: 0; width: 100%; height: 16px; opacity: 0; cursor: pointer; margin: 0;">
+                                <audio src="${this.content}" preload="auto"></audio>
+                            </div>
+
+                            <div class="message-audio-duration" style="font-size: 11px; color: rgba(0, 0, 0, 0.45); line-height: 1;">0:00</div>
+                        </div>
+
+                        <div class="audio-speed-container" style="flex-shrink: 0; display: flex; align-items: center;">
+                            <button class="audio-speed-btn" style="background: rgba(0, 0, 0, 0.05); border: none; border-radius: 12px; padding: 3px 6px; cursor: pointer; font-size: 10px; font-weight: bold; color: rgba(0, 0, 0, 0.5); outline: none;">1.0×</button>
+                        </div>
+
+                        <div class="_1mbqw" style="flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                            <div class="QnDup" style="display: flex; align-items: center;">
+                                <span data-icon="ptt-out-blue">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 26" width="16" height="22">
+                                        <path fill="${me ? '#03A9F4' : '#a0a0a0'}" d="M9.217 24.401c-1.158 0-2.1-.941-2.1-2.1v-2.366c-3.111-.476-5.467-3.159-5.467-6.402v-1.748h1.4v1.748c0 3.143 2.557 5.7 5.7 5.7s5.7-2.557 5.7-5.7v-1.748h1.4v1.748c0 3.243-2.356 5.926-5.467 6.402v2.366c0 1.159-.942 2.1-2.1 2.1z"></path>
+                                        <path fill="${me ? '#03A9F4' : '#a0a0a0'}" d="M9.367 15.668a2.765 2.765 0 0 0 2.765-2.765V5.26a2.765 2.765 0 0 0-5.53 0v7.643a2.765 2.765 0 0 0 2.765 2.765z"></path>
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+
                     </div>
+
+                    <div style="display: flex; justify-content: flex-end; align-items: center; padding: 0 12px 6px 0; gap: 4px; margin-top: -2px;">
+                        <span class="message-time" style="font-size: 11px; color: rgba(0, 0, 0, 0.4); text-align: right;">${Format.timeStampToTime(this.timeStamp)}</span>
+                        ${me ? `
+                        <div class="_3S8Q-" role="button" style="display: flex; align-items: center;">
+                            <span data-icon="status-dblcheck">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="15" height="15">
+                                    <path fill="#4fc3f7" d="M17.394 5.035l-.57-.444a.434.434 0 0 0-.609.076l-6.39 8.198a.38.38 0 0 1-.577.039l-.427-.388a.381.381 0 0 0-.578.038l-.451.576a.497.497 0 0 0 .043.645l1.575 1.51a.38.38 0 0 0 .577-.039l7.483-9.602a.436.436 0 0 0-.076-.609zm-4.892 0l-.57-.444a.434.434 0 0 0-.609.076l-6.39 8.198a.38.38 0 0 1-.577.039l-2.614-2.556a.435.435 0 0 0-.614.007l-.505.516a.435.435 0 0 0 .007.614l3.887 3.8a.38.38 0 0 0 .577-.039l7.483-9.602a.435.435 0 0 0-.075-.609z"></path>
+                                </svg>
+                            </span>
+                        </div>
+                        ` : ''}
+                    </div>
+
                 </div>`;
+
+                // 🎙️ SELETORES DO JAVASCRIPT
+                let audioEl = div.querySelector('audio');
+                let loadEl = div.querySelector('.audio-load');
+                let btnPlay = div.querySelector('.audio-play');
+                let btnPause = div.querySelector('.audio-pause');
+                let inputRange = div.querySelector('[type=range]');
+                let audioDuration = div.querySelector('.message-audio-duration');
+                let progressSpan = div.querySelector('.nDKsM');
+                let btnSpeed = div.querySelector('.audio-speed-btn'); // <-- Seleciona o botão novo
+
+                if (this.duration) {
+                    audioDuration.innerHTML = Format.toTime(this.duration * 1000);
+                }
+
+                if (this.photo) {
+                    let img = div.querySelector('.message-photo');
+                    if (img) {
+                        img.src = this.photo;
+                        img.show();
+                    }
+                    let avatarPadrao = div.querySelector('._3ZW2E');
+                    if (avatarPadrao) avatarPadrao.hide();
+                }
+
+                // --- OUVINTES DO CONTROLADOR DE ÁUDIO ---
+                audioEl.onloadeddata = e => {
+                    loadEl.hide();
+                    btnPlay.show();
+                };
+
+                audioEl.onplay = e => {
+                    btnPlay.hide();
+                    btnPause.show();
+                };
+
+                audioEl.onpause = e => {
+                    btnPlay.show();
+                    btnPause.hide();
+                };
+
+                audioEl.onended = e => {
+                    audioEl.currentTime = 0;
+                    btnPlay.show();
+                    btnPause.hide();
+                    if (progressSpan) progressSpan.style.width = '0%';
+                    if (inputRange) inputRange.value = 0;
+                };
+
+                audioEl.ontimeupdate = e => {
+                    audioDuration.innerHTML = Format.toTime(audioEl.currentTime * 1000);
+                    if (this.duration) {
+                        let pct = (audioEl.currentTime * 100) / this.duration;
+                        inputRange.value = pct;
+                        if (progressSpan) progressSpan.style.width = `${pct}%`;
+                    }
+                };
+
+                btnPlay.on('click', e => {
+                    audioEl.play();
+                });
+
+                btnPause.on('click', e => {
+                    audioEl.pause();
+                });
+
+                inputRange.on('change', e => {
+                    if (this.duration) {
+                        audioEl.currentTime = (inputRange.value * this.duration) / 100;
+                    }
+                });
+
+                // 👇 ⚡ LÓGICA DO ACELERADOR DE ÁUDIO
+                if (btnSpeed) {
+                    btnSpeed.on('click', () => {
+                        if (audioEl.playbackRate === 1.0) {
+                            audioEl.playbackRate = 1.5;
+                            btnSpeed.innerHTML = '1.5×';
+                            btnSpeed.style.background = me ? 'rgba(0, 175, 156, 0.15)' : 'rgba(81, 182, 149, 0.15)';
+                            btnSpeed.style.color = me ? '#00af9c' : '#51b695';
+                        } else if (audioEl.playbackRate === 1.5) {
+                            audioEl.playbackRate = 2.0;
+                            btnSpeed.innerHTML = '2.0×';
+                        } else {
+                            audioEl.playbackRate = 1.0;
+                            btnSpeed.innerHTML = '1.0×';
+                            btnSpeed.style.background = 'rgba(0, 0, 0, 0.05)';
+                            btnSpeed.style.color = 'rgba(0, 0, 0, 0.5)';
+                        }
+                    });
+                }
+
             break;
 
             default:
@@ -481,6 +645,41 @@ export class Message extends Model {
                     }).catch(err => f(err));
                 }).catch(err => f(err));
             }).catch(err => f(err));
+        });
+    }
+
+    static sendAudio(chatId, from, file, metadata, photo) {
+        return new Promise((resolve, reject) => {
+            
+            // Cria o balão de mensagem no banco (ainda sem o áudio, só para aparecer na tela rápido)
+            Message.send(chatId, from, 'audio', '').then(msgRef => {
+                
+                //Faz o upload do arquivo físico de áudio para o Firebase Storage
+                Message.upload(file, from).then(snapshot => {
+                    
+                    //Pega a URL pública gerada pelo Storage
+                    getDownloadURL(snapshot.ref).then(downloadUrl => {
+                        
+                        //Atualiza a mensagem que criamos no passo 1 com os dados completos
+                        setDoc(msgRef, {
+                            content: downloadUrl,
+                            size: file.size,
+                            fileType: file.type,
+                            status: 'sent',
+                            photo: photo,
+                            duration: metadata.duration
+                        }, { merge: true }).then(() => {
+                            
+                            resolve(); // Sucesso!
+                            
+                        }).catch(err => reject(err));
+                        
+                    }).catch(err => reject(err));
+                    
+                }).catch(err => reject(err));
+                
+            }).catch(err => reject(err));
+            
         });
     }
 

@@ -917,32 +917,43 @@ export class WhatAppController{
                 this.el.recordMicrophone.show();
                 this.el.btnSendMicrophone.hide(); 
                 
-                
                 this._microphoneController = new MicrophoneController();
 
                 this._microphoneController.on('ready', musica => {
-                    
                     console.log('ready event');
-
                     this._microphoneController.startRecorder();
                 });
 
                 this._microphoneController.on('recordtimer', timer => {
-
                     this.el.recordMicrophoneTimer.innerHTML = Format.toTime(timer);
-
-                })
-
+                });
             });
 
             this.el.btnCancelMicrophone.on('click', e =>{
-                this._microphoneController.stopRecorded();
+                
+                this._microphoneController.stopRecorder();
                 this.closeRecordMicrophone()
             });
 
             this.el.btnFinishMicrophone.on('click', e =>{            
-                this._microphoneController.stopRecorded();
-                this.closeRecordMicrophone()
+                
+                this._microphoneController.on('recorded', (file, metadata) => {
+
+                    Message.sendAudio(
+                        this._contactActive.chatId,
+                        this._user.email,
+                        file,
+                        metadata,
+                        this._user.photo
+                    ).then(() => {
+                        console.log("Áudio enviado com sucesso");
+                    }).catch(err => {
+                        console.error("Erro ao enviar áudio", err);
+                    });
+                });
+
+                this._microphoneController.stopRecorder();
+                this.closeRecordMicrophone();
             });
 
             this.el.inputText.on('keypress', e =>{

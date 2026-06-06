@@ -43,31 +43,40 @@ export class MicrophoneController extends ClassEvent {
 
             this._mediaRecorder.addEventListener('stop', e =>{
 
-            let blob = new Blob(this._recordedChunks, {
+                let blob = new Blob(this._recordedChunks, {
                     type: this._mimeType
                 });
 
                 let filename = `rec${Date.now()}.webm`;
 
-                let file = new File([blob], filename, {
-                    type: this._mimeType,
-                    lastModified: Date.now()
-                });
-
-                console.log('file', file);
-
+                // Instancia o leitor e o decodificador de áudio
+                let audioContext = new AudioContext();
                 let reader = new FileReader();
 
                 reader.onload = e => {
+                    
+                    // Decodifica os dados para descobrir a duração do áudio
+                    audioContext.decodeAudioData(reader.result).then(decode => {
+                        
+                        let file = new File([blob], filename, {
+                            type: this._mimeType,
+                            lastModified: Date.now()
+                        });
 
-                    console.log('reader file', file);
+                        // Cria o metadado que vamos enviar para o Firebase!
+                        let metadata = {
+                            duration: decode.duration // Pegamos a duração decodificada aqui
+                        };
 
-                    let audio = new Audio(reader.result);
+                        this.trigger('recorded', file, metadata);
 
-                    audio.play();                    
-                }
+                    }).catch(err => {
+                        console.error("Erro ao decodificar áudio:", err);
+                    });
+                };
 
-                reader.readAsDataURL(file);
+                // Inicia a leitura do arquivo como Array de Bytes (dispara o onload acima)
+                reader.readAsArrayBuffer(blob);
 
             });
             
@@ -77,7 +86,7 @@ export class MicrophoneController extends ClassEvent {
         };
     };
 
-    stopRecorded(){
+    stopRecorder(){
 
         if (this.isAvailable()){
 
