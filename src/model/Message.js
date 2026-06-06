@@ -513,16 +513,37 @@ export class Message extends Model {
                 timeStamp: new Date(),
                 status: 'wait'
             }).then((result) => {
-                const docRef = doc(messagesRef, result.id);
+                    const docRef = doc(messagesRef, result.id);
 
-                setDoc(docRef, {
-                    status: 'sent'
-                }, { merge: true }).then(() => {
-                    s(docRef); 
+                    setDoc(docRef, {
+                        status: 'sent'
+                    }, { merge: true }).then(() => {
+
+                        const docRef = doc(messagesRef, result.id);
+
+                    setDoc(docRef, {
+                        status: 'sent'
+                    }, { merge: true }).then(() => {
+                        
+                        try {
+                            // Descriptografa o chatId (ex: "seu@email.com/amigo@email.com")
+                            let decodificado = atob(chatId);
+                            let emails = decodificado.split('/');
+                            
+                            //Descobre qual dos dois e-mails é o do seu amigo (o que for diferente do seu)
+                            let toEmail = emails.find(email => email !== from) || from;
+
+                            // Dispara a atualização dinâmica dos painéis laterais
+                            Message.updateLastMessage(from, toEmail, content, type);
+                        } catch (e) {
+                            console.error("Erro ao processar atualização da última mensagem:", e);
+                        }
+                        s(docRef); 
+                    }).catch(err => f(err));
                 }).catch(err => f(err));
-            }).catch(err => f(err));
-        });
-    }
+            });
+        })
+    };
 
     static sendImage(chatId, from, file) {
         return new Promise((s, f) => {
@@ -686,7 +707,31 @@ export class Message extends Model {
         });
     }
 
+    static updateLastMessage(fromEmail, toEmail, textContent, type) {
+        const now = new Date();
 
+        // Tratamento visual para a barra lateral não ficar com um link gigante se for foto/áudio
+        let displayMessage = textContent;
+        if (type === 'image') {
+            displayMessage = '📷 Foto';
+        } else if (type === 'audio') {
+            displayMessage = '🎙️ Áudio';
+        } else if (type === 'document') {
+            displayMessage = '📄 Documento';
+        }
 
+        //Atualiza na SUA lista de contatos lateral
+        const myContactRef = doc(db, "users", fromEmail, "contacts", btoa(toEmail));
+        setDoc(myContactRef, {
+            lastMessage: displayMessage,
+            lastMessageTime: now
+        }, { merge: true }).catch(err => console.error("Erro no meu painel:", err));
 
+        // Atualiza na lista de contatos lateral do seu AMIGO (Reciprocidade)
+        const friendContactRef = doc(db, "users", toEmail, "contacts", btoa(fromEmail));
+        setDoc(friendContactRef, {
+            lastMessage: displayMessage,
+            lastMessageTime: now
+        }, { merge: true }).catch(err => console.error("Erro no painel do amigo:", err));
+    }
 }

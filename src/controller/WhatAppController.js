@@ -172,6 +172,20 @@ export class WhatAppController{
             docsSnapshot.docs.forEach(doc => {
                 
                 let contact = doc.data();
+
+                let lastMessageText = contact.lastMessage || '';
+
+                // DECLARAÇÃO DA HORA
+                let lastMessageTimeStr = '';
+                if (contact.lastMessageTime) {
+                    // Se for um Timestamp do Firebase v9, extrai com .toDate(), senão trata como Date comum
+                    let dateObj = (typeof contact.lastMessageTime.toDate === 'function') 
+                        ? contact.lastMessageTime.toDate() 
+                        : new Date(contact.lastMessageTime);
+                    
+                    // Formata direto para o padrão "HH:MM" brasileiro (Ex: 12:30)
+                    lastMessageTimeStr = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                }
                 
                 let div = document.createElement('div');
                 div.className = 'contact-item';
@@ -182,6 +196,7 @@ export class WhatAppController{
                         <img src="#" class="Qgzj8 gqwaM photo" style="display:none;">
                         <div class="_3ZW2E">
                             <span data-icon="default-user" class="">
+                                <!-- SVG do bonequinho... -->
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 212 212" width="212" height="212">
                                     <path fill="#DFE5E7" d="M106.251.5C164.653.5 212 47.846 212 106.25S164.653 212 106.25 212C47.846 212 .5 164.654.5 106.25S47.846.5 106.251.5z"></path>
                                     <g fill="#FFF">
@@ -198,7 +213,8 @@ export class WhatAppController{
                             <span dir="auto" title="${contact.name}" class="_1wjpf">${contact.name}</span>
                         </div>
                         <div class="_3Bxar">
-                            <span class="_3T2VG">${contact.lastMessageTime || ''}</span>
+                            <!-- 🎯 A HORA SEGURA É INJETADA AQUI -->
+                            <span class="_3T2VG">${lastMessageTimeStr}</span>
                         </div>
                     </div>
                     <div class="_1AwDx">
@@ -212,11 +228,12 @@ export class WhatAppController{
                                         </svg>
                                     </span>
                                 </div>
-                                <span dir="ltr" class="_1wjpf _3NFp9">${contact.lastMessage || ''}</span>
+                                <!-- 🎯 O TEXTO SEGURO É INJETADO AQUI -->
+                                <span dir="ltr" class="_1wjpf _3NFp9">${lastMessageText}</span>
                                 <div class="_3Bxar">
                                     <span>
                                         <div class="_15G96">
-                                            <span class="OUeyt messages-count-new" style="display:none;">1</span>
+                                            <span class="OUeyt messages-count-new" style="display:none;"></span>
                                         </div>
                                     </span>
                                 </div>
