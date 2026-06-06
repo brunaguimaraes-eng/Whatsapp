@@ -438,11 +438,6 @@ export class Message extends Model {
 
     }
 
-
-
-
-
-
     static sendDocument(chatId, from, file, filePreview = null, filenameText = '') {
         return new Promise((s, f) => {
 

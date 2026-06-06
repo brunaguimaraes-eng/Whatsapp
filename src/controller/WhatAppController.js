@@ -1040,7 +1040,68 @@ export class WhatAppController{
 
             })
             
-        });        
+        });     
+        
+        //Delegação de eventos: ouvir clique no botão do contato enviado
+        //colocamos o evento de clique no painel, que nunca é destruido, enquanto o botão é substituido pelo firebase e perde
+        //o evento de escuta
+        this.el.panelMessagesContainer.addEventListener('click', e => {
+                
+            // Verifica se clicou exatamente no botão "Enviar mensagem"
+            let btnContact = e.target.closest('.btn-message-send');
+
+            if (btnContact) {
+                // Depois que confirmamos que clicou no botao, precisamos saber de qual mensagem é, o closest faz o JS passar pelas
+                // divs do "miolo" até chegar na div mãe. pega o ID dela e o replace tira o underline, ai ficamos com o
+                //id puro no firebase
+                let messageDiv = btnContact.closest('._3_7SH');
+                
+                if (messageDiv) {
+                    let messageId = messageDiv.id.replace('_', '');
+
+                    // Busca essa mensagem no banco de dados para recuperar o e-mail do contato
+                    getDoc(doc(Message.getRef(this._contactActive.chatId), messageId)).then(docSnapshot => {
+                        
+                        if (docSnapshot.exists()) {
+                            let data = docSnapshot.data();
+
+                            //validamos o tipo contact da mensagem e extraimos o conteúdo;
+                            if (data.type === 'contact') {     
+                                let contactData = data.content; //pega somente os dados do content
+                                
+                                console.log('Iniciando conversa com o contato compartilhado:', contactData.name);
+
+                                // Instancia o novo contato usando a classe User
+                                let newContact = new User(contactData.email);
+                                
+                                //pagamos os e-mails, colocamos em ordem alfab. juntamos com uma / e convertemos para b64
+                                //o código btoa será o mesmo para ambos os usuários
+                                newContact.on('datachange', info => {
+                                    // Calcula a Hash do chatId combinando o SEU e-mail com o e-mail do CONTATO NOVO
+                                    let emails = [this._user.email, newContact.email].sort();
+                                    newContact.chatId = btoa(emails.join('/'));
+
+                                    this.gravarContatoNoUsuario(newContact); //salva contato na lista lateral
+                                    
+                                    // Abre o chat na tela chamando o seu método!
+                                    this.setActiveChat(newContact);
+                                });
+                            }
+                        }
+
+                    }).catch(err => {
+                        console.error("Erro ao ler dados do contato compartilhado:", err);
+                    });
+                }
+            }
+        });
+
+    
+
+
+
+
+
 
     }
 
@@ -1090,10 +1151,10 @@ export class WhatAppController{
                 console.error("Erro ao gravar o contato na sua subcoleção:", err);
             });
             
-        }
-    }
+        };
+    };    
 
 
 
 
-}
+};
