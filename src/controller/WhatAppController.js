@@ -24,6 +24,7 @@ export class WhatAppController{
 
     constructor(){
         
+        this._active = true;
         this._db = db;
         this._auth = auth;
         this._storage = storage;
@@ -32,8 +33,57 @@ export class WhatAppController{
         this.initEvents();
         this.initAuth();
         this._messagesFn = null;
+        this.checkNotifications();
         
     }   
+
+    checkNotifications(){
+
+        if(typeof Notification === 'function'){
+
+            if(Notification.permission !== 'granted' && !this._active){
+
+                this.el.alertNotificationPermission.show();
+
+            } else {
+                this.el.alertNotificationPermission.hide();
+            }
+
+            this.el.alertNotificationPermission.on('click', e => {
+
+                Notification.requestPermission(permission => {
+
+                    if (permission === 'granted'){
+                        this.el.alertNotificationPermission.hide();
+                        console.info('notificações permitidas');
+
+                    }
+
+                });
+
+            })
+
+        }
+
+    }
+
+    notification(data) {
+        if(Notification.permission === 'granted') {
+            let n = new Notification(this._contactActive.name, {
+                icon: this._contactActive.photo,
+                body: data.content
+            });
+
+            let sound = new Audio('./audio/alert.mp3');
+            sound.currentTime = 0;
+            sound.play();
+
+            setTimeout(() => {
+                if (n) n.close();
+            }, 3000);
+        }
+    }
+
 
     initAuth() {
         onAuthStateChanged(this._auth, (user) => { // Abre o observador do Firebase
@@ -285,7 +335,7 @@ export class WhatAppController{
 
         this.el.panelMessagesContainer.innerHTML = '';        //limpa o container de mensagens para receber as novas
 
-        const q = query(                                    //ordenação de menssagens, mostra da mais nova pra mais antiga
+        const q = query(                                    //ordenação de mensagens, mostra da mais nova pra mais antiga
             Message.getRef(contact.chatId),
             orderBy('timeStamp', 'asc')
         );
@@ -312,7 +362,9 @@ export class WhatAppController{
 
                     let me = (data.from === this._user.email);
 
-                    if (!me && data.status !== 'read') {                                            
+                    if (!me && data.status !== 'read') {   
+                        
+                        this.notification(data);
                         
                         // Criamos a referência do documento atual
                         setDoc(doc.ref, {
@@ -467,6 +519,14 @@ export class WhatAppController{
     }
 
     initEvents(){
+
+        window.addEventListener('focus', e => {
+            this._active = true;
+        });
+
+        window.addEventListener('blur', e => {
+            this._active = false;
+        });
 
         this.el.inputSearchContacts.on('keyup', e => {
 
